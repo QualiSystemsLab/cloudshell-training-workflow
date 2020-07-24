@@ -11,7 +11,7 @@ with open('test_requirements.txt') as f_tests:
     required_for_tests = f_tests.read().splitlines()
 
 setup(
-        name="cloudshell-orch-training",
+        name="cloudshellpro-orch-training",
         author="Quali",
         author_email="support@qualisystems.com",
         description="A package providing an extension for the default setup workflow for training use cases",
@@ -22,7 +22,7 @@ setup(
         install_requires=required,
         version=version_from_file,
         include_package_data=True,
-        keywords="sandbox cloud training cloudshell",
+        keywords="sandbox cloud training cloudshellpro",
         classifiers=[
             "Development Status :: 1 - Beta",
             "Topic :: Software Development :: Libraries",
