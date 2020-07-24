@@ -1,6 +1,6 @@
 import unittest
 
-import cloudshell.orch.training
+import cloudshellpro.orch.training.setup_orchestrator
 
 
 class TestTraining(unittest.TestCase):
