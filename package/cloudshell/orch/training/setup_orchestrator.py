@@ -23,4 +23,3 @@ class TrainingSetupWorkflow(object):
         if enable_configuration:
             sandbox.logger.debug("Default configuration is added to sandbox orchestration")
             sandbox.workflow.add_to_configuration(self.default_setup_workflow.default_configuration, None)
-
