@@ -5,12 +5,17 @@ from cloudshell.orch.training.models.training_env import TrainingEnvironmentData
 from package.cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 
 from netaddr import IPAddress, IPNetwork
+import json
+
+class IPsHandler:
+
+    def __init__(self, sandbox: Sandbox):
+        self._sandbox = sandbox
+        # TODO add the output service
 
 
-class ips_handler():
-
-    def _set_deployed_apps_addition_ips(sandbox: Sandbox, reservation_details: ReservationDescriptionInfo,output_svc: SandboxOutputService,data: TrainingEnvironmentDataModel):
-        api = sandbox.automation_api
+    def _set_deployed_apps_addition_ips(self, reservation_details: ReservationDescriptionInfo,output_svc: SandboxOutputService,data: TrainingEnvironmentDataModel):
+        api = self._sandbox.automation_api
         for resource in reservation_details.Resources:
             output_svc.debug_print(f'checking app:{resource.Name}')
             if resource.VmDetails:
@@ -57,13 +62,13 @@ class ips_handler():
 
                     output_svc.debug_print(f'calling add IP api for {resource.Name} and nic {eni} with: {addition_ips_string}')
 
-                    api.ExecuteResourceConnectedCommand(sandbox.id, resource.Name,
+                    api.ExecuteResourceConnectedCommand(self._sandbox.id, resource.Name,
                                                          "assign_additional_private_ipv4s",
                                                          "connectivity", parameterValues=[eni, addition_ips_string],
                                                          printOutput=True)
 
-    def _create_ips_json(sandbox: Sandbox, ips_list, app_name):
-        sand_details = sandbox.automation_api.GetReservationDetails(sandbox.id,
+    def _create_ips_json(self, ips_list, app_name,output_svc: SandboxOutputService):
+        sand_details = self._sandbox.automation_api.GetReservationDetails(self._sandbox.id,
                                                                     disableCache=True).ReservationDescription
         connectors = sand_details.Connectors
         sandbox_services_dict = {service.Alias: service for service in sand_details.Services}
@@ -80,10 +85,10 @@ class ips_handler():
                 if IPAddress(ip) in IPNetwork(cidr):
                     new_ip_pairs[cidr] = ip
         result = json.dumps(new_ip_pairs)
-        debug_print(f"Creating private spec for {app_name} string: {result}")
+        output_svc.debug_print(f"Creating private spec for {app_name} string: {result}")
         return result
 
-    def get_ip_json(sandbox: Sandbox, app: ReservationAppResource, increment: int):
+    def get_ip_json(self, app: ReservationAppResource,output_svc: SandboxOutputService,data: TrainingEnvironmentDataModel, increment: int):
 
         orig_deployment_path = app.DeploymentPaths[0]
         requested_ips_string = next(
@@ -92,10 +97,10 @@ class ips_handler():
         if requested_ips_string:
             if requested_ips_string and requested_ips_string.startswith('{') and requested_ips_string.endswith('}'):
                 return requested_ips_string
-            original_ip_values[app.Name] = requested_ips_string
-            debug_print(f'original ip for {app.Name} it is: {requested_ips_string}')
+            data.original_ip_values[app.Name] = requested_ips_string
+            output_svc.debug_print(f'original ip for {app.Name} it is: {requested_ips_string}')
             requested_ips = requested_ips_string.split(";")
-            debug_print(f"incrementing requested ips {requested_ips}")
+            output_svc.debug_print(f"incrementing requested ips {requested_ips}")
             new_ips = []
             for ip in requested_ips:
 
@@ -110,10 +115,10 @@ class ips_handler():
                 if len(address_and_range) > 1:
                     new_range = str(int(address_and_range[1]) + increment)
                     new_ip_req = new_ip_str + '-' + new_range
-                    additional_ip_range[new_ip_str] = new_ip_req
-                    debug_print(f'saving ip for {new_ip_str} it is: {new_ip_req}')
+                    data.additional_ip_range[new_ip_str] = new_ip_req
+                    output_svc.debug_print(f'saving ip for {new_ip_str} it is: {new_ip_req}')
                 new_ips.append(new_ip_str)
 
-            return _create_ips_json(sandbox, new_ips, app.Name)
+            return self._create_ips_json(self, new_ips, app.Name)
 
         return ''

@@ -6,17 +6,20 @@ from cloudshell.api.cloudshell_api import UpdateTopologyGlobalInputsRequest, Res
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
 from cloudshell.orch.training.models.position import Position
+
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
-from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService
+from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
+
 
 
 class UserSandboxesLogic:
 
-    def __init__(self, env_data: TrainingEnvironmentDataModel, sandbox_output_service: SandboxOutputService,
+    def __init__(self, env_data: TrainingEnvironmentDataModel, sandbox_output_service: SandboxOutputService ,
                  users_data_manager: UsersDataManagerService):
+
         self._env_data = env_data
-        self._sandbox_output = sandbox_output_service
+        self._sandbox_output = SandboxOutputService
         self._users_data = users_data_manager
 
     def create(self, sandbox, components):
