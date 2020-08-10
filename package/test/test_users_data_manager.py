@@ -79,7 +79,8 @@ class TestUsersDataManagerService(unittest.TestCase):
         sandbox.automation_api = Mock()
         sandbox_data_kvp = [Mock(Key=USERS_DICT_KEY, Value={'user': {'key1', 'value1'}}),
                             Mock(Key='some_key', Value='some_value')]
-        sandbox.automation_api.GetSandboxData = Mock(return_value=Mock(SandboxDataKeyValues=sandbox_data_kvp))
+        get_sandbox_data_return_val = Mock(SandboxDataKeyValues=sandbox_data_kvp)
+        sandbox.automation_api.GetSandboxData = Mock(return_value=get_sandbox_data_return_val)
         users_data_manager = UsersDataManagerService(sandbox)
 
         # act

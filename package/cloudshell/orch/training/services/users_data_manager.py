@@ -8,6 +8,13 @@ from cloudshell.workflow.orchestration.sandbox import Sandbox
 USERS_DICT_KEY = "users_dict"
 
 
+class UsersDataManagerServiceKeys:
+    SANDBOX_ID = "sandbox_id"
+    TOKEN = "token"
+    STUDENT_LINK = "student_link"
+    ID = "id"
+
+
 class UsersDataManagerService:
     """
     This service is thread safe

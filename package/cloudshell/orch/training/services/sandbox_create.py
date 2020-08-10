@@ -24,21 +24,20 @@ class SandboxCreateService:
 
         return new_sandbox.Reservation
 
-    def wait_active(self, user_sandbox_id: str, user: str):
+    def wait_ready(self, sandbox_id: str, user: str, interval: int = 10):
         time_waited = 0
-        interval = 10
 
-        user_sandbox_status = self._sandbox.automation_api.GetReservationStatus(user_sandbox_id)
+        user_sandbox_status = self._sandbox.automation_api.GetReservationStatus(sandbox_id)
 
         while user_sandbox_status.ReservationSlimStatus.Status != "Started" or \
                 user_sandbox_status.ReservationSlimStatus.ProvisioningStatus != "Ready":
 
             self._sandbox_output.notify(f"""waiting for {user}'s sandbox, 
-                                        currently {user_sandbox_id}'s sandbox satus is {user_sandbox_status.ReservationSlimStatus.Status} 
+                                        currently {sandbox_id}'s sandbox status is {user_sandbox_status.ReservationSlimStatus.Status} 
                                         and {user_sandbox_status.ReservationSlimStatus.ProvisioningStatus}""")
             sleep(interval)
             time_waited += interval
-            user_sandbox_status = self._sandbox.automation_api.GetReservationStatus(user_sandbox_id)
+            user_sandbox_status = self._sandbox.automation_api.GetReservationStatus(sandbox_id)
 
             if user_sandbox_status.ReservationSlimStatus.ProvisioningStatus == 'Error':
                 raise Exception('Cannot create student sandbox')
