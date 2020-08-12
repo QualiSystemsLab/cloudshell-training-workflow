@@ -6,6 +6,7 @@ from mock import MagicMock, call, ANY
 
 from cloudshell.orch.training.logic.create_user_sandboxes import UserSandboxesLogic
 from cloudshell.orch.training.models.position import Position
+from cloudshell.orch.training.models.student_link import StudentLinkModel
 from cloudshell.orch.training.services.users_data_manager import UsersDataManagerServiceKeys as userDataKeys
 
 
@@ -16,10 +17,10 @@ class TestUserSandboxesLogic(unittest.TestCase):
         self.sandbox_output_service = Mock()
         self.users_data_manager = Mock()
         self.sandbox_create_service = Mock()
-        self.sandbox_api = Mock()
-        self.config = Mock()
-        self.logic = UserSandboxesLogic(self.config, self.env_data, self.sandbox_output_service, self.users_data_manager,
-                                        self.sandbox_create_service, self.sandbox_api)
+        self.email_service = Mock()
+        self.student_links_provider = Mock()
+        self.logic = UserSandboxesLogic(self.env_data, self.sandbox_output_service, self.users_data_manager,
+                                        self.sandbox_create_service, self.email_service, self.student_links_provider)
 
         self.sandbox = Mock()
 
@@ -29,12 +30,12 @@ class TestUserSandboxesLogic(unittest.TestCase):
         self.logic._get_latest_sandbox_details = Mock()
 
         # act
-        self.logic.create(Mock(), Mock())
+        self.logic.create_user_sandboxes(Mock(), Mock())
 
         # assert
         self.logic._get_latest_sandbox_details.assert_not_called()
 
-    def test_create(self):
+    def test_create_user_sandboxes(self):
         # arrange
         sandbox_details_mock = Mock()
         self.logic._get_latest_sandbox_details = Mock(return_value=sandbox_details_mock)
@@ -43,7 +44,7 @@ class TestUserSandboxesLogic(unittest.TestCase):
         self.logic._send_emails = Mock()
 
         # act
-        self.logic.create(self.sandbox, Mock())
+        self.logic.create_user_sandboxes(self.sandbox, Mock())
 
         # assert
         self.logic._get_latest_sandbox_details.assert_called_once_with(self.sandbox)
@@ -140,25 +141,41 @@ class TestUserSandboxesLogic(unittest.TestCase):
         # arrange
         sandbox_details = Mock()
         self.logic._calculate_user_sandbox_duration = Mock()
-        trainee_sandbox = Mock()
-        self.sandbox_create_service.create_trainee_sandbox = Mock(return_value=trainee_sandbox)
-        self.sandbox_api.create_token = Mock(return_value='token')
-        self.env_data.users_list = ['user']
-        self.config.training_portal_base_url = 'http://training-portal:8080'
+        self.env_data.users_list = ['user1', 'user2']
+        user1_sandbox = Mock()
+        user2_sandbox = Mock()
+        self.sandbox_create_service.create_trainee_sandbox = Mock(side_effect=[user1_sandbox, user2_sandbox])
+        user1_link = Mock()
+        user2_link = Mock()
+        self.student_links_provider.create_student_link = Mock(side_effect=[user1_link, user2_link])
 
         # act
-        self.logic._create_user_sandboxes(self.sandbox, sandbox_details)
+        self.logic._create_user_sandboxes(sandbox_details)
 
         # assert
-        self.users_data_manager.add_or_update.assert_has_calls([
-            call('user', userDataKeys.SANDBOX_ID, trainee_sandbox.Id),
-            call('user', userDataKeys.TOKEN, 'token'),
-            call('user', userDataKeys.STUDENT_LINK, f"{self.config.training_portal_base_url}/{trainee_sandbox.Id}?access=token")
+        self.student_links_provider.create_student_link.assert_has_calls([
+            call('user1', user1_sandbox.Id),
+            call('user2', user2_sandbox.Id)
         ])
+        self.users_data_manager.add_or_update.assert_has_calls([
+            call('user1', userDataKeys.SANDBOX_ID, user1_sandbox.Id),
+            call('user1', userDataKeys.TOKEN, user1_link.token),
+            call('user1', userDataKeys.STUDENT_LINK, user1_link.student_link),
+            call('user2', userDataKeys.SANDBOX_ID, user2_sandbox.Id),
+            call('user2', userDataKeys.TOKEN, user2_link.token),
+            call('user2', userDataKeys.STUDENT_LINK, user2_link.student_link)
+        ], any_order=True)
 
-    @unittest.skip
     def test_send_emails(self):
         # arrange
-        self.logic._get_resource_positions = Mock()
-        self.logic._get_shared_resources = MagicMock()
-        self.env_data.users_list = ['user1']
+        self.env_data.users_list = ['user1', 'user2']
+        user1_link = Mock()
+        user2_link = Mock()
+        self.users_data_manager.get_key = Mock(side_effect=[user1_link, user2_link])
+
+        # act
+        self.logic._send_emails()
+
+        # assert
+        self.email_service.send_email.assert_has_calls([call('user1', user1_link), call('user2', user2_link)])
+        self.assertEqual(self.email_service.send_email.call_count, 2)

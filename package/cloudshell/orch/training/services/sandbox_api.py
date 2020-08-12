@@ -5,6 +5,7 @@ from cloudshell.orch.training.services.sandbox_output import SandboxOutputServic
 
 
 class SandboxAPIService:
+
     def __init__(self, sandbox: Sandbox, port: int, sandbox_output: SandboxOutputService):
         self._port = port
         self._sandbox = sandbox
@@ -22,8 +23,7 @@ class SandboxAPIService:
                             "username": self._sandbox.connectivityContextDetails.admin_user,
                             "password": self._sandbox.connectivityContextDetails.admin_pass,
                             "domain": self._sandbox.reservationContextDetails.domain
-                        },
-                        verify=False)
+                        })
         return r.json()
 
     def create_token(self, api_token: str, user: str, domain: str) -> str:
@@ -44,7 +44,7 @@ class SandboxAPIService:
         self._sandbox_output.debug_print(f"Deleting REST API Token {user_token}")
         authorization = f"Basic {api_token}"
         headers = {'Content-type': 'application/json', 'Authorization': authorization}
-        r = requests.delete(f'http://{self._sandbox.connectivityContextDetails.server_address}:{self._port}'
+        r = self._s.delete(f'http://{self._sandbox.connectivityContextDetails.server_address}:{self._port}'
                             f'/api/Token/{user_token}', headers=headers)
         if 400 <= r.status_code < 300:
             self._sandbox_output.debug_print("Error deleting token")
