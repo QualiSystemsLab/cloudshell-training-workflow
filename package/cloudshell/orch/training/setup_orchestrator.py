@@ -34,10 +34,10 @@ class TrainingSetupWorkflow(object):
             sandbox.workflow.add_to_configuration(self.default_setup_workflow.default_configuration, None)
 
     def bootstrap(self,sandbox: Sandbox):
-        self.data = TrainingEnvironmentDataModel(sandbox)
+        self.data = TrainingEnvironmentDataModel()
         self.userdata_svc = UsersDataManagerService(sandbox)
         self.training_users_list = SandboxInputsParser.sandbox_user_list(sandbox)
-        self.instructor_mode = SandboxInputsParser.is_instructor_mode(sandbox)
+        self.data.instructor_mode = SandboxInputsParser.is_instructor_mode(sandbox)
         debug_enabled = SandboxInputsParser.is_debug_on(sandbox)
         self.output_svc = SandboxOutputService(sandbox,debug_enabled)
 
