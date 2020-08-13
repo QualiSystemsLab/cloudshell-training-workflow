@@ -22,7 +22,10 @@ class TrainingSetupWorkflow(object):
     def _bootstrap(self, sandbox: Sandbox):
         sandbox.logger.info("Bootstrapping setup workflow")
 
-        env_data = TrainingEnvironmentDataModel()  # todo - init data, need to merge sandbox inputs parser from Dans branch
+        env_data = TrainingEnvironmentDataModel()
+        # todo - init data, need to merge sandbox inputs parser from Dans branch
+        SandboxInputsParser.parse_sandbox_inputs(env_data,sandbox)
+
         sandbox_output_service = SandboxOutputService(sandbox, env_data.debug_enabled)
         users_data_manager = UsersDataManagerService(sandbox)
         sandbox_create_service = SandboxCreateService(sandbox, sandbox_output_service)
@@ -37,9 +40,8 @@ class TrainingSetupWorkflow(object):
     def register(self, sandbox: Sandbox, enable_provisioning: bool = True, enable_connectivity: bool = True,
                  enable_configuration: bool = True):
 
-        self.bootstrap(sandbox)
         sandbox.logger.info("Adding training setup orchestration")
-	#TODO fix bootstrap
+	    #TODO fix bootstrap
         self._bootstrap(sandbox)
 
         # TODO - add here calls to our training workflow logic
@@ -57,15 +59,14 @@ class TrainingSetupWorkflow(object):
             sandbox.logger.debug("Default configuration is added to sandbox orchestration")
             sandbox.workflow.add_to_configuration(self.default_setup_workflow.default_configuration, None)
 
-    def bootstrap(self,sandbox: Sandbox):
-        self.data = TrainingEnvironmentDataModel()
-        self.userdata_svc = UsersDataManagerService(sandbox)
-        self.training_users_list = SandboxInputsParser.sandbox_user_list(sandbox)
-        self.data.instructor_mode = SandboxInputsParser.is_instructor_mode(sandbox)
-        debug_enabled = SandboxInputsParser.is_debug_on(sandbox)
-        self.output_svc = SandboxOutputService(sandbox,debug_enabled)
-
-
-
         sandbox.logger.debug("Create user sandboxes logic is added to sandbox orchestration")
         sandbox.workflow.on_configuration_ended(self.user_sandbox_logic.create_user_sandboxes, None)
+
+
+
+    def bootstrap(self, sandbox: Sandbox):
+
+         self.training_users_list = SandboxInputsParser.sandbox_user_list(sandbox)
+         self.data.instructor_mode = SandboxInputsParser.is_instructor_mode(sandbox)
+         debug_enabled = SandboxInputsParser.is_debug_on(sandbox)
+

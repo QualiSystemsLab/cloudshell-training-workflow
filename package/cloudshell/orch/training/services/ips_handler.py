@@ -68,10 +68,10 @@ class IPsHandler:
                                                          printOutput=True)
 
     def _create_ips_json(self, ips_list, app_name,output_svc: SandboxOutputService):
-        sand_details = self._sandbox.automation_api.GetReservationDetails(self._sandbox.id,
+        sandbox_details = self._sandbox.automation_api.GetReservationDetails(self._sandbox.id,
                                                                     disableCache=True).ReservationDescription
-        connectors = sand_details.Connectors
-        sandbox_services_dict = {service.Alias: service for service in sand_details.Services}
+        connectors = sandbox_details.Connectors
+        sandbox_services_dict = {service.Alias: service for service in sandbox_details.Services}
 
         app_connectors = [conn for conn in connectors if conn.Source == app_name or conn.Target == app_name]
         connected_services = [conn.Target if conn.Source == app_name else conn.Source for conn in app_connectors]
@@ -88,7 +88,27 @@ class IPsHandler:
         output_svc.debug_print(f"Creating private spec for {app_name} string: {result}")
         return result
 
-    def get_ip_json(self, app: ReservationAppResource,output_svc: SandboxOutputService,data: TrainingEnvironmentDataModel, increment: int):
+    @staticmethod
+    def _reformat_ips_string(requested_ips,output_svc: SandboxOutputService,env_data: TrainingEnvironmentDataModel, increment: int):
+        new_ips = []
+        for ip in requested_ips:
+            address_and_range = ip.split('-')
+            # If user specified a range we want to ignore it
+            address = address_and_range[0]
+            # We should save the address and range as we will soon override it
+            split_ip = address.split(".")
+            split_ip[-1] = str(int(split_ip[-1]) + increment)
+            new_ip_str = ".".join(split_ip)
+
+            if len(address_and_range) > 1:
+                new_range = str(int(address_and_range[1]) + increment)
+                new_ip_req = new_ip_str + '-' + new_range
+                env_data.additional_ip_range[new_ip_str] = new_ip_req
+                output_svc.debug_print(f'saving ip for {new_ip_str} it is: {new_ip_req}')
+            new_ips.append(new_ip_str)
+        return new_ips
+
+    def get_ip_json(self, app: ReservationAppResource,output_svc: SandboxOutputService,env_data: TrainingEnvironmentDataModel, increment: int):
 
         orig_deployment_path = app.DeploymentPaths[0]
         requested_ips_string = next(
@@ -97,27 +117,11 @@ class IPsHandler:
         if requested_ips_string:
             if requested_ips_string and requested_ips_string.startswith('{') and requested_ips_string.endswith('}'):
                 return requested_ips_string
-            data.original_ip_values[app.Name] = requested_ips_string
+            env_data.original_ip_values[app.Name] = requested_ips_string
             output_svc.debug_print(f'original ip for {app.Name} it is: {requested_ips_string}')
             requested_ips = requested_ips_string.split(";")
             output_svc.debug_print(f"incrementing requested ips {requested_ips}")
-            new_ips = []
-            for ip in requested_ips:
-
-                address_and_range = ip.split('-')
-                # If user specified a range we want to ignore it
-                address = address_and_range[0]
-                # We should save the address and range as we will soon override it
-                split_ip = address.split(".")
-                split_ip[-1] = str(int(split_ip[-1]) + increment)
-                new_ip_str = ".".join(split_ip)
-
-                if len(address_and_range) > 1:
-                    new_range = str(int(address_and_range[1]) + increment)
-                    new_ip_req = new_ip_str + '-' + new_range
-                    data.additional_ip_range[new_ip_str] = new_ip_req
-                    output_svc.debug_print(f'saving ip for {new_ip_str} it is: {new_ip_req}')
-                new_ips.append(new_ip_str)
+            new_ips = self._reformat_ips_string(requested_ips,env_data,increment)
 
             return self._create_ips_json(self, new_ips, app.Name)
 
