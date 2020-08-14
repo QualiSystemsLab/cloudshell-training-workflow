@@ -22,9 +22,8 @@ class TrainingSetupWorkflow(object):
     def _bootstrap(self, sandbox: Sandbox):
         sandbox.logger.info("Bootstrapping setup workflow")
 
-        env_data = TrainingEnvironmentDataModel()
         # todo - init data, need to merge sandbox inputs parser from Dans branch
-        SandboxInputsParser.parse_sandbox_inputs(env_data,sandbox)
+        env_data = SandboxInputsParser.parse_sandbox_inputs(sandbox)
 
         sandbox_output_service = SandboxOutputService(sandbox, env_data.debug_enabled)
         users_data_manager = UsersDataManagerService(sandbox)
@@ -61,12 +60,4 @@ class TrainingSetupWorkflow(object):
 
         sandbox.logger.debug("Create user sandboxes logic is added to sandbox orchestration")
         sandbox.workflow.on_configuration_ended(self.user_sandbox_logic.create_user_sandboxes, None)
-
-
-
-    def bootstrap(self, sandbox: Sandbox):
-
-         self.training_users_list = SandboxInputsParser.sandbox_user_list(sandbox)
-         self.data.instructor_mode = SandboxInputsParser.is_instructor_mode(sandbox)
-         debug_enabled = SandboxInputsParser.is_debug_on(sandbox)
 
