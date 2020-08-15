@@ -7,6 +7,7 @@ from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.position import Position
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
+from cloudshell.orch.training.services.apps import AppsService
 from cloudshell.orch.training.services.email import EmailService
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
 from cloudshell.orch.training.services.sandbox_create import SandboxCreateService
@@ -20,13 +21,15 @@ class UserSandboxesLogic:
 
     def __init__(self, env_data: TrainingEnvironmentDataModel, sandbox_output_service: SandboxOutputService,
                  users_data_manager: UsersDataManagerService, sandbox_create_service: SandboxCreateService,
-                 email_service: EmailService, student_links_provider: StudentLinksProvider):
+                 email_service: EmailService, student_links_provider: StudentLinksProvider,
+                 apps_service: AppsService):
         self._env_data = env_data
         self._sandbox_output = sandbox_output_service
         self._users_data = users_data_manager
         self._sandbox_create_service = sandbox_create_service
         self._email_service = email_service
         self._student_links_provider = student_links_provider
+        self._apps_service = apps_service
 
     def create_user_sandboxes(self, sandbox, components):
 
@@ -60,7 +63,7 @@ class UserSandboxesLogic:
     def _wait_for_active_sandboxes_and_add_duplicated_resources(self, sandbox: Sandbox,
                                                                 sandbox_details: ReservationDescriptionInfo):
         resource_positions_dict = self._get_resource_positions(sandbox)
-        shared_resources = self._get_shared_resources(sandbox_details)
+        shared_resources = self._get_shared_resources(sandbox)
 
         for user in self._env_data.users_list:
             user_sandbox_id = self._users_data.get_key(user, userDataKeys.SANDBOX_ID)
@@ -88,11 +91,16 @@ class UserSandboxesLogic:
                                    resource_positions}
         return resource_positions_dict
 
-    def _get_shared_resources(self, sandbox_details: ReservationDescriptionInfo) -> List[str]:
-        shared_resources = [resource.Name for resource in sandbox_details.Resources if resource.AppTemplateName
-                            and resource.AppTemplateName in self._env_data.shared_apps]
-        for resource in shared_resources:
-            self._sandbox_output.debug_print(f'will add shared resource: {resource}')
+    def _get_shared_resources(self, sandbox: Sandbox) -> List[str]:
+        # todo run this code against live environment to test that logic is correct - alexa
+        apps = [app.app_request.app_resource for app in sandbox.components.apps.values()]
+        apps_to_share = [app.Name for app in apps if self._apps_service.should_share_app(app)]
+
+        shared_resources = [resource.Name for resource in sandbox.components.resources if resource.AppDetails
+                            and resource.AppDetails.AppName and resource.AppDetails.AppName in apps_to_share]
+
+        [self._sandbox_output.debug_print(f'will add shared resource: {resource}') for resource in shared_resources]
+
         return shared_resources
 
     def _create_user_sandboxes(self, sandbox_details: ReservationDescriptionInfo):
@@ -123,3 +131,4 @@ class UserSandboxesLogic:
         end_time = datetime.strptime(sandbox_details.EndTime, '%m/%d/%Y %H:%M')
         duration = int((end_time - datetime.utcnow()).total_seconds() / 60)
         return duration
+

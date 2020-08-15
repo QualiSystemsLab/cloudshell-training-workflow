@@ -9,12 +9,10 @@ from email.mime.text import MIMEText
 from cloudshell.orch.training.models.config import EmailConfig
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 
-
 EmailMessage = namedtuple('EmailTemplate', ['subject', 'message'])
 
 
 class EmailService:
-
 
     def __init__(self, email_config: EmailConfig, sandbox_output_service: SandboxOutputService, logger: logging.Logger):
         self._email_config = email_config
@@ -81,4 +79,3 @@ class EmailService:
             'not found' if not subject else subject,
             'not found' if not content else content
         )
-

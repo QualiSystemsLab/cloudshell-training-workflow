@@ -11,13 +11,16 @@ class TestTrainingSetupWorkflow(unittest.TestCase):
     def test_register(self):
         # arrange
         config = Mock(spec=TrainingWorkflowConfig())
-        setup = TrainingSetupWorkflow(config)
         sandbox = Mock()
+        setup = TrainingSetupWorkflow(sandbox, config)
+        setup.preparation_logic.prepare_environment = Mock()
 
         # act
+        setup.prepare_environment()
         setup.register(sandbox)
 
         # assert
+        setup.preparation_logic.prepare_environment.assert_called_once()
         sandbox.workflow.add_to_provisioning.assert_called_once_with(
             setup.default_setup_workflow.default_provisioning, None)
         sandbox.workflow.add_to_connectivity.assert_called_once_with(
