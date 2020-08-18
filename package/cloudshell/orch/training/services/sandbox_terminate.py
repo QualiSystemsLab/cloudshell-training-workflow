@@ -18,23 +18,14 @@ class SandboxTerminateService:
         self._training_env = training_env
 
     def terminate_student_sandboxes(self):
-        api = self._sandbox.automation_api
-
         self._users_data_manager.load()
 
-        '''
-        sandbox_data_dict = {item.Key: item.Value for item in
-                             api.GetSandboxData(self._sandbox.id).SandboxDataKeyValues}              
-        if "users_dict" in sandbox_data_dict.keys():
-            users_dict = json.loads(sandbox_data_dict["users_dict"])
-        '''
         for user in self._training_env:
-            for user_data in self._users_data_manager.get(user):
-                self._end_student_resrevation(user, user_data)
-                admin_token = self._sandbox_api.login()
-                self._sandbox_api.delete_token(api_token=admin_token, user_token=self._users_data_manager.get_key("token"))
+            self._end_student_reservation(user)
+            admin_token = self._sandbox_api.login()
+            self._sandbox_api.delete_token(api_token=admin_token, user_token=self._users_data_manager.get_key("token"))
 
-    def _end_student_resrevation(self,user):
+    def _end_student_reservation(self,user):
         api = self._sandbox.automation_api
 
         self._sandbox_output.notify(f"Cleaning up <{user}> resources")
@@ -57,5 +48,3 @@ class SandboxTerminateService:
                 api.RemoveResourcesFromReservation(user_reservation_id, student_shared_apps)
 
             api.EndReservation(user_reservation_id)
-
-
