@@ -92,13 +92,17 @@ class TestSandboxInputsParser(unittest.TestCase):
         # assert
         self.assertTrue(flag)
 
-    def test_parse_sandbox_inputs(self):
-        sandbox_input_parser = SandboxInputsParser()
-        mock_return_value = Mock()
-        sandbox_input_parser._sandbox_user_list = Mock()
-        sandbox_input_parser._is_instructor_mode = Mock()
-        sandbox_input_parser._is_debug_on = Mock()
-        sandbox_input_parser.parse_sandbox_inputs(self.sandbox)
-        sandbox_input_parser._sandbox_user_list.assert_called_once()
+    @patch("cloudshell.orch.training.parsers.sandbox_inputs_processing.SandboxInputsParser._sandbox_user_list")
+    @patch("cloudshell.orch.training.parsers.sandbox_inputs_processing.SandboxInputsParser._is_instructor_mode")
+    @patch("cloudshell.orch.training.parsers.sandbox_inputs_processing.SandboxInputsParser._is_debug_on")
+    def test_parse_sandbox_inputs(self,m1_patch: Mock,m2_patch: Mock,m3_patch: Mock):
+        m1_patch.return_value = Mock()
+        m2_patch.return_value = Mock()
+        m3_patch.return_value = Mock()
+
+        SandboxInputsParser.parse_sandbox_inputs(self.sandbox)
+        SandboxInputsParser._sandbox_user_list.assert_called_once()
+        SandboxInputsParser._sandbox_user_list._is_instructor_mode()
+        SandboxInputsParser._sandbox_user_list._is_debug_on()
 
 

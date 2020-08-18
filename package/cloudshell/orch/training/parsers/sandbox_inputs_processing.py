@@ -2,13 +2,15 @@ from cloudshell.orch.training.models.training_env import TrainingEnvironmentData
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
 class SandboxInputsParser:
+
     @staticmethod
     def _is_debug_on(sandbox):
         if 'Diagnostics' in sandbox.global_inputs:
             return sandbox.global_inputs['Diagnostics'] == 'On'
         return False
 
-    def parse_sandbox_inputs(self,sandbox: Sandbox) -> TrainingEnvironmentDataModel:
+    @staticmethod
+    def parse_sandbox_inputs(sandbox: Sandbox) -> TrainingEnvironmentDataModel:
         env_data = TrainingEnvironmentDataModel()
         env_data.instructor_mode = SandboxInputsParser._is_instructor_mode(sandbox)
         env_data.debug_enabled = SandboxInputsParser._is_debug_on(sandbox)
