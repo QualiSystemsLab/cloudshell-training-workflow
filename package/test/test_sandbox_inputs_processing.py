@@ -95,10 +95,10 @@ class TestSandboxInputsParser(unittest.TestCase):
     @patch("cloudshell.orch.training.parsers.sandbox_inputs_processing.SandboxInputsParser._sandbox_user_list")
     @patch("cloudshell.orch.training.parsers.sandbox_inputs_processing.SandboxInputsParser._is_instructor_mode")
     @patch("cloudshell.orch.training.parsers.sandbox_inputs_processing.SandboxInputsParser._is_debug_on")
-    def test_parse_sandbox_inputs(self,m1_patch: Mock,m2_patch: Mock,m3_patch: Mock):
-        m1_patch.return_value = Mock()
-        m2_patch.return_value = Mock()
-        m3_patch.return_value = Mock()
+    def test_parse_sandbox_inputs(self,sandbox_user_list_patch: Mock,is_instructor_mode_patch: Mock,is_debug_on_patch: Mock):
+        sandbox_user_list_patch.return_value = Mock()
+        is_instructor_mode_patch.return_value = Mock()
+        is_debug_on_patch.return_value = Mock()
 
         SandboxInputsParser.parse_sandbox_inputs(self.sandbox)
         SandboxInputsParser._sandbox_user_list.assert_called_once()
