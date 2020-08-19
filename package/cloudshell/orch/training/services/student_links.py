@@ -22,3 +22,4 @@ class StudentLinksProvider:
     def _create_token(self, user: str, domain: str) -> str:
         admin_token = self._sandbox_api.login()
         return self._sandbox_api.create_token(admin_token, user, domain)
+    
