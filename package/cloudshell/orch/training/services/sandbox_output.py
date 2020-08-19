@@ -3,7 +3,7 @@ from cloudshell.workflow.orchestration.sandbox import Sandbox
 
 class SandboxOutputService:
 
-    def __init__(self, sandbox: Sandbox, debug_enabled: bool = False):
+    def __init__(self, sandbox: Sandbox, debug_enabled: bool):
         self._sandbox = sandbox
         self._debug_enabled = debug_enabled
 
