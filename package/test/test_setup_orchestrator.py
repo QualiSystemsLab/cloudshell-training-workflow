@@ -1,6 +1,6 @@
 import unittest
 
-from mock import Mock
+from mock import Mock, MagicMock
 
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.setup_orchestrator import TrainingSetupWorkflow
@@ -12,7 +12,7 @@ class TestTrainingSetupWorkflow(unittest.TestCase):
         # arrange
         config = Mock(spec=TrainingWorkflowConfig())
         setup = TrainingSetupWorkflow(config)
-        sandbox = Mock()
+        sandbox = Mock(global_inputs = MagicMock())
 
         # act
         setup.register(sandbox)

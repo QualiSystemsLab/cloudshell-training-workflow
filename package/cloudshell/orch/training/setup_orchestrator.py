@@ -1,6 +1,7 @@
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.workflow.orchestration.setup.default_setup_orchestrator import DefaultSetupWorkflow
 
+from cloudshell.orch.training.parsers.sandbox_inputs_processing import SandboxInputsParser
 from cloudshell.orch.training.logic.create_user_sandboxes import UserSandboxesLogic
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
@@ -21,7 +22,9 @@ class TrainingSetupWorkflow(object):
     def _bootstrap(self, sandbox: Sandbox):
         sandbox.logger.info("Bootstrapping setup workflow")
 
-        env_data = TrainingEnvironmentDataModel()  # todo - init data, need to merge sandbox inputs parser from Dans branch
+        # todo - init data, need to merge sandbox inputs parser from Dans branch
+        env_data = SandboxInputsParser.parse_sandbox_inputs(sandbox)
+
         sandbox_output_service = SandboxOutputService(sandbox, env_data.debug_enabled)
         users_data_manager = UsersDataManagerService(sandbox)
         sandbox_create_service = SandboxCreateService(sandbox, sandbox_output_service)
@@ -32,10 +35,12 @@ class TrainingSetupWorkflow(object):
         self.user_sandbox_logic = UserSandboxesLogic(env_data, sandbox_output_service, users_data_manager,
                                                      sandbox_create_service, email_service, student_links_provider)
 
+
     def register(self, sandbox: Sandbox, enable_provisioning: bool = True, enable_connectivity: bool = True,
                  enable_configuration: bool = True):
-        sandbox.logger.info("Adding training setup orchestration")
 
+        sandbox.logger.info("Adding training setup orchestration")
+	    #TODO fix bootstrap
         self._bootstrap(sandbox)
 
         # TODO - add here calls to our training workflow logic
@@ -55,3 +60,4 @@ class TrainingSetupWorkflow(object):
 
         sandbox.logger.debug("Create user sandboxes logic is added to sandbox orchestration")
         sandbox.workflow.on_configuration_ended(self.user_sandbox_logic.create_user_sandboxes, None)
+
