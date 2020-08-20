@@ -102,7 +102,6 @@ class TestSandboxInputsParser(unittest.TestCase):
 
         SandboxInputsParser.parse_sandbox_inputs(self.sandbox)
         SandboxInputsParser._sandbox_user_list.assert_called_once()
-        SandboxInputsParser._sandbox_user_list._is_instructor_mode()
-        SandboxInputsParser._sandbox_user_list._is_debug_on()
-
+        SandboxInputsParser._is_instructor_mode.assert_called_once()
+        SandboxInputsParser._is_debug_on.assert_called_once()
 
