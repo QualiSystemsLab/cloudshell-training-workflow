@@ -29,7 +29,8 @@ class TrainingSetupWorkflow(object):
     def _bootstrap(self):
         self.sandbox.logger.info("Bootstrapping setup workflow")
 
-        self.env_data = SandboxInputsParser.parse_sandbox_inputs(self.sandbox)
+<<<<<<< HEAD
+        self.env_data = TrainingEnvironmentDataModel()  # todo - init data, need to merge sandbox inputs parser from Dans branch
         sandbox_output_service = SandboxOutputService(self.sandbox, self.env_data.debug_enabled)
         users_data_manager = UsersDataManagerService(self.sandbox)
         sandbox_create_service = SandboxCreateService(self.sandbox.automation_api, sandbox_output_service)
@@ -40,11 +41,23 @@ class TrainingSetupWorkflow(object):
         apps_service = AppsService(sandbox_output_service)
         users_service = UsersService(self.sandbox.automation_api, self.sandbox.logger)
         ips_handler_service = IPsHandlerService()
+=======
+        # todo - init data, need to merge sandbox inputs parser from Dans branch
+        env_data = SandboxInputsParser.parse_sandbox_inputs(sandbox)
+
+        sandbox_output_service = SandboxOutputService(sandbox, env_data.debug_enabled)
+        users_data_manager = UsersDataManagerService(sandbox)
+        sandbox_create_service = SandboxCreateService(sandbox, sandbox_output_service)
+        sandbox_api_service = SandboxAPIService(sandbox, self.config.sandbox_api_port, sandbox_output_service)
+        email_service = EmailService(self.config.email_config, sandbox_output_service, sandbox.logger)
+        student_links_provider = StudentLinksProvider(self.config.training_portal_base_url, sandbox, sandbox_api_service)
+>>>>>>> origin/master
 
         self.user_sandbox_logic = UserSandboxesLogic(self.env_data, sandbox_output_service, users_data_manager,
                                                      sandbox_create_service, email_service, student_links_provider,
                                                      apps_service)
 
+<<<<<<< HEAD
         self.preparation_logic = PrepareEnvironmentLogic(self.env_data, self.config, users_data_manager,
                                                          sandbox_output_service, apps_service, sandbox_create_service,
                                                          users_service, ips_handler_service)
@@ -60,6 +73,15 @@ class TrainingSetupWorkflow(object):
         """
         # prepare environment before setup execution
         self.preparation_logic.prepare_environment(self.sandbox)
+=======
+
+    def register(self, sandbox: Sandbox, enable_provisioning: bool = True, enable_connectivity: bool = True,
+                 enable_configuration: bool = True):
+
+        sandbox.logger.info("Adding training setup orchestration")
+	    #TODO fix bootstrap
+        self._bootstrap(sandbox)
+>>>>>>> origin/master
 
     def register(self, enable_provisioning: bool = True, enable_connectivity: bool = True,
                  enable_configuration: bool = True):
@@ -77,6 +99,12 @@ class TrainingSetupWorkflow(object):
             self.sandbox.logger.debug("Default configuration is added to sandbox orchestration")
             self.sandbox.workflow.add_to_configuration(self.default_setup_workflow.default_configuration, None)
 
+<<<<<<< HEAD
         if self.env_data.instructor_mode:
             self.sandbox.logger.debug("Create user sandboxes logic is added to sandbox orchestration")
             self.sandbox.workflow.on_configuration_ended(self.user_sandbox_logic.create_user_sandboxes, None)
+=======
+        sandbox.logger.debug("Create user sandboxes logic is added to sandbox orchestration")
+        sandbox.workflow.on_configuration_ended(self.user_sandbox_logic.create_user_sandboxes, None)
+
+>>>>>>> origin/master
