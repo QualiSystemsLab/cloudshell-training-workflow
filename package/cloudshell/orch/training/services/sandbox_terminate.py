@@ -17,6 +17,11 @@ class SandboxTerminateService:
         self._users_data_manager = users_data_manager
         self._training_env = training_env
 
+    def _delete_students_group(self):
+        api = self._sandbox.automation_api
+        self._sandbox_output.debug_print(f'Removing Students Group: {self._sandbox.id}')
+        api.RemoveGroupsFromDomain(api.GetReservationDetails(self._sandbox.id).ReservationDescription.DomainName,self._sandbox.id)
+
     def terminate_student_sandboxes(self):
         self._users_data_manager.load()
 
@@ -24,6 +29,8 @@ class SandboxTerminateService:
             self._end_student_reservation(user)
             admin_token = self._sandbox_api.login()
             self._sandbox_api.delete_token(api_token=admin_token, user_token=self._users_data_manager.get_key("token"))
+
+        self._delete_students_group()
 
     def _end_student_reservation(self,user):
         api = self._sandbox.automation_api

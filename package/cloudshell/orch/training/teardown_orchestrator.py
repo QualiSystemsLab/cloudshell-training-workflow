@@ -31,4 +31,4 @@ class TrainingTeardownWorkflow(object):
         self._sandbox_terminator.terminate_student_sandboxes()
         #TODO delete users group
         sandbox.logger.info("Adding default teardown orchestration")
-        sandbox.workflow.add_to_teardown(self.default_teardown, None)
+        sandbox.workflow.add_to_teardown( self._sandbox_terminator.terminate_student_sandboxes(), None)
