@@ -13,7 +13,6 @@ class UsersDataManagerServiceKeys:
     TOKEN = "token"
     STUDENT_LINK = "student_link"
     ID = "id"
-    PASSWORD = "pass"
 
 
 class UsersDataManagerService:

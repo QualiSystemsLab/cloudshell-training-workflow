@@ -2,15 +2,17 @@ from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.workflow.orchestration.setup.default_setup_orchestrator import DefaultSetupWorkflow
 
 from cloudshell.orch.training.logic.create_user_sandboxes import UserSandboxesLogic
-from cloudshell.orch.training.logic.prepare import PrepareEnvironmentLogic
+from cloudshell.orch.training.logic.prepare_env import PrepareEnvironmentLogic
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
 from cloudshell.orch.training.services.apps import AppsService
 from cloudshell.orch.training.services.email import EmailService
+from cloudshell.orch.training.services.ips_handler import IPsHandlerService
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
 from cloudshell.orch.training.services.sandbox_create import SandboxCreateService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 from cloudshell.orch.training.services.student_links import StudentLinksProvider
+from cloudshell.orch.training.services.users import UsersService
 from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService
 
 
@@ -29,19 +31,22 @@ class TrainingSetupWorkflow(object):
         self.env_data = TrainingEnvironmentDataModel()  # todo - init data, need to merge sandbox inputs parser from Dans branch
         sandbox_output_service = SandboxOutputService(self.sandbox, self.env_data.debug_enabled)
         users_data_manager = UsersDataManagerService(self.sandbox)
-        sandbox_create_service = SandboxCreateService(self.sandbox, sandbox_output_service)
+        sandbox_create_service = SandboxCreateService(self.sandbox.automation_api, sandbox_output_service)
         sandbox_api_service = SandboxAPIService(self.sandbox, self.config.sandbox_api_port, sandbox_output_service)
         email_service = EmailService(self.config.email_config, sandbox_output_service, self.sandbox.logger)
         student_links_provider = StudentLinksProvider(self.config.training_portal_base_url, self.sandbox,
                                                       sandbox_api_service)
         apps_service = AppsService(sandbox_output_service)
+        users_service = UsersService(self.sandbox.automation_api, self.sandbox.logger)
+        ips_handler_service = IPsHandlerService()
 
         self.user_sandbox_logic = UserSandboxesLogic(self.env_data, sandbox_output_service, users_data_manager,
                                                      sandbox_create_service, email_service, student_links_provider,
                                                      apps_service)
 
-        self.preparation_logic = PrepareEnvironmentLogic(self.env_data, users_data_manager, sandbox_output_service,
-                                                         apps_service)
+        self.preparation_logic = PrepareEnvironmentLogic(self.env_data, self.config, users_data_manager,
+                                                         sandbox_output_service, apps_service, sandbox_create_service,
+                                                         users_service, ips_handler_service)
 
     def prepare_environment_and_register(self, enable_provisioning: bool = True, enable_connectivity: bool = True,
                                          enable_configuration: bool = True):
@@ -58,8 +63,6 @@ class TrainingSetupWorkflow(object):
     def register(self, enable_provisioning: bool = True, enable_connectivity: bool = True,
                  enable_configuration: bool = True):
         self.sandbox.logger.info("Adding training setup orchestration")
-
-        # TODO - add here calls to our training workflow logic
 
         if enable_provisioning:
             self.sandbox.logger.debug("Default provisioning is added to sandbox orchestration")

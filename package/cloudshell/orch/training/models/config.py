@@ -24,12 +24,13 @@ class EmailConfig:
 
 class TrainingWorkflowConfig:
     def __init__(self, training_portal_base_url: str = '', sandbox_api_port: int = 82,
-                 email_config: EmailConfig = None):
+                 app_duplicate_ip_increment: int = 10, email_config: EmailConfig = None):
         """
-        :param training_portal_base_url:
+        :param training_portal_base_url: Base url for training portal including port
         :param sandbox_api_port:
         :param email_config: if None emails to training users will not be sent
         """
         self.training_portal_base_url = training_portal_base_url
         self.sandbox_api_port = sandbox_api_port
+        self.app_duplicate_ip_increment = app_duplicate_ip_increment
         self.email_config = email_config

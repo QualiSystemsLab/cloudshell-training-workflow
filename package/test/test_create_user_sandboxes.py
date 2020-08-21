@@ -161,7 +161,7 @@ class TestUserSandboxesLogic(unittest.TestCase):
         self.student_links_provider.create_student_link = Mock(side_effect=[user1_link, user2_link])
 
         # act
-        self.logic._create_user_sandboxes(sandbox_details)
+        self.logic._create_user_sandboxes(self.sandbox, sandbox_details)
 
         # assert
         self.student_links_provider.create_student_link.assert_has_calls([

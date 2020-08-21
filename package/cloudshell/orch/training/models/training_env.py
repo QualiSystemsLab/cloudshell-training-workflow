@@ -6,4 +6,3 @@ class TrainingEnvironmentDataModel:
         self.users_list = []  # type: List[str]
         self.debug_enabled = False
         self.instructor_mode = True
-
