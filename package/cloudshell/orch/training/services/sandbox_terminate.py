@@ -27,7 +27,6 @@ class SandboxTerminateService:
         self._sandbox_output.debug_print(f'Student reservation status is: {user_reservation_status}')
 
         instructor_resources = api.GetReservationDetails(self._sandbox.id).ReservationDescription.Resources
-
         instructor_deployed_apps_names = [resource.Name for resource in instructor_resources if resource.VmDetails]
 
         #If student (user) reservation has not ended yet -> remove the resources that are shared with the Instructor and than End the reservation

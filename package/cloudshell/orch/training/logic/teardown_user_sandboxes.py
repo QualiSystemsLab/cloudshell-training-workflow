@@ -28,10 +28,12 @@ class SandboxTerminateLogic:
 
     def teardown_student_sandboxes(self):
         self._users_data_manager.load()
+        admin_token = self._sandbox_api.login()
 
-        for user in self._training_env:
+        for user in self._training_env.users_list:
+            self._sandbox_output.debug_print(f'Preparing sandbox Teardown for user: {user}')
             self._sandbox_termination_service.end_student_reservation(user)
-            admin_token = self._sandbox_api.login()
+            self._sandbox_output.debug_print(f'Deleting Token for user: {user}')
             self._sandbox_api.delete_token(api_token=admin_token, user_token=self._users_data_manager.get_key(user,userDataKeys.TOKEN))
 
         self._delete_students_group()
@@ -39,6 +41,4 @@ class SandboxTerminateLogic:
 
 
 #TODO
-# add comments
 # Main logic function as Login function that uses terminate_service
-# remove using get.key with strings ->Done

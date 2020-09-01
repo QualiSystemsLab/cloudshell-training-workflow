@@ -28,6 +28,5 @@ class TrainingTeardownWorkflow(object):
         :return:
         """
         self._bootstrap(sandbox)
-        #TODO delete users group
         sandbox.logger.info("Adding default teardown orchestration")
         sandbox.workflow.add_to_teardown( self._sandbox_terminator.teardown_student_sandboxes(), None)
