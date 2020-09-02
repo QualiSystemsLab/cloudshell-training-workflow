@@ -8,7 +8,7 @@ from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
 from cloudshell.orch.training.services.sandbox_components import SandboxComponentsService
 from cloudshell.orch.training.services.email import EmailService
-from cloudshell.orch.training.services.ips_handler import IPsHandlerService, RequestedIPsIncrementProvider
+from cloudshell.orch.training.services.ip import IPsHandlerService, RequestedIPsIncrementProvider
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
 from cloudshell.orch.training.services.sandbox_create import SandboxCreateService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService

@@ -1,6 +1,6 @@
 from typing import Dict
 
-from cloudshell.orch.training.services.ips_handler import RequestedIPsIncrementProvider
+from cloudshell.orch.training.services.ip import RequestedIPsIncrementProvider
 
 
 class EmailConfig:

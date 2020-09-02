@@ -80,13 +80,13 @@ class RequestedIPsIncrementProvider:
                 new_ips.append(new_ip_str)
 
             else:
-                new_ips_list = self._increment_comma_separated_list(increment_octet, increment_size, ip_req)
+                new_ips_list = self._increment_comma_separated_list(ip_req, increment_octet, increment_size)
                 new_ips.append(new_ips_list)
 
         incremented_ips_string = ';'.join(new_ips)
         return incremented_ips_string
 
-    def _increment_comma_separated_list(self, increment_octet: str, increment_size: int, ip_req: str) -> str:
+    def _increment_comma_separated_list(self, ip_req: str, increment_octet: str, increment_size: int) -> str:
         new_ips_list = []
         ip_req_list = ip_req.split(',')
 
