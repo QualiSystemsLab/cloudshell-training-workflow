@@ -4,41 +4,38 @@ from typing import Dict, List, Tuple
 from cloudshell.api.cloudshell_api import AttributeNameValue, Connector, ReservationAppResource, \
     ReservationDescriptionInfo, ServiceInstance, CloudShellAPISession, ApiEditAppRequest, SetConnectorRequest, \
     NameValuePair
-from cloudshell.api.common_cloudshell_api import CloudShellAPIError
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.position import Position
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
-from cloudshell.orch.training.services.apps import AppsService
-from cloudshell.orch.training.services.ips_handler import IPsHandlerService
+from cloudshell.orch.training.services.sandbox_components import SandboxComponentsService
+from cloudshell.orch.training.services.ips_handler import RequestedIPsIncrementProvider
 from cloudshell.orch.training.services.sandbox_create import SandboxCreateService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 from cloudshell.orch.training.services.users import UsersService
 from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService, \
     UsersDataManagerServiceKeys as userDataKeys
-from cloudshell.orch.training.utils.password import PasswordUtils
 
 PRIVATE_IP_ATTR = "Private IP"
-MGMT_SERVICE_NAMES = ['mgmt', 'management', 'mgt']
 
 ConnectorsAttrUpdateRequest = namedtuple('ConnectorsAttrUpdateRequest', ['Souurce', 'Target', 'AttributeRequests'])
 
 
-class PrepareEnvironmentLogic:
+class InitializeEnvironmentLogic:
 
     def __init__(self, env_data: TrainingEnvironmentDataModel, config: TrainingWorkflowConfig,
                  users_data_manager: UsersDataManagerService, sandbox_output_service: SandboxOutputService,
-                 apps_service: AppsService, sandbox_service: SandboxCreateService, users_service: UsersService,
-                 ips_handler: IPsHandlerService):
+                 sandbox_components_service: SandboxComponentsService, sandbox_service: SandboxCreateService,
+                 users_service: UsersService, ips_increment_provider: RequestedIPsIncrementProvider):
         self._env_data = env_data
         self._config = config
         self._users_data_manager = users_data_manager
         self._sandbox_output = sandbox_output_service
-        self._apps_service = apps_service
+        self._components_service = sandbox_components_service
         self._sandbox_service = sandbox_service
         self._users_service = users_service
-        self._ips_handler = ips_handler
+        self._ips_increment_provider = ips_increment_provider
 
     def prepare_environment(self, sandbox: Sandbox):
         if self._env_data.instructor_mode:
@@ -70,30 +67,14 @@ class PrepareEnvironmentLogic:
         apps = [app.app_request.app_resource for app in sandbox.components.apps.values()]
         sandbox_details = api.GetReservationDetails(sandbox.id).ReservationDescription
 
-        app_connectors = self._get_apps_to_connectors_dict(apps, sandbox_details, sandbox.components.services)
+        app_connectors = self._components_service.get_apps_to_connectors_dict(apps, sandbox_details,
+                                                                              sandbox.components.services)
 
-        # TODO - review this - the logic here is weird
         connectors_attr_updates = self._prepare_requested_vnic_attr_connector_changes(app_connectors, sandbox_details)
 
-        # todo Refactoring 2: Private IP requests string transform to JSON - need to to talk with Costya
-        # app_edit_requests = []
-        # for app in sandbox_details.Apps:
-        #
-        #     orig_deployment_path = app.DeploymentPaths[0]
-        #     ip_json = get_ip_json(sandbox, app, 0)
-        #
-        #     if ip_json:
-        #         new_deployment_attributes = [NameValuePair(att.Name, att.Value) for att in
-        #                                      orig_deployment_path.DeploymentService.Attributes if
-        #                                      "Private IP" not in att.Name]
-        #         new_deployment_attributes.append(NameValuePair("Private IP", ip_json))
-        #
-        #         new_default_deployment = DefaultDeployment(orig_deployment_path.Name,
-        #                                                    Deployment(new_deployment_attributes))
-        #         app_edit_requests.append(ApiEditAppRequest(app.Name, None, None, None, new_default_deployment))
-
         # duplicate apps including name and IP changes
-        connectors_attr_updates.extend(self._duplicate_apps(api, apps, app_connectors, sandbox.id))
+        connectors_attr_updates.extend(
+            self._duplicate_apps(api, apps, app_connectors, sandbox.id))
 
         # execute bulk update for connector attributes
         for att_change in connectors_attr_updates:
@@ -103,8 +84,8 @@ class PrepareEnvironmentLogic:
                         app_connectors: Dict[str, List[Connector]], sandbox_id: str) \
             -> List[ConnectorsAttrUpdateRequest]:
 
-        apps_to_duplicate = self._apps_service.get_apps_to_duplicate(apps)
-        service_app_positions_dict = self._get_service_or_app_name_to_position_dict(api, sandbox_id)
+        apps_to_duplicate = self._components_service.get_apps_to_duplicate(apps)
+        service_app_positions_dict = self._components_service.get_service_and_app_name_to_position_dict(api, sandbox_id)
 
         app_edit_requests = []
         set_connector_requests = []
@@ -125,13 +106,13 @@ class PrepareEnvironmentLogic:
                                                                service_app_positions_dict[app.Name],
                                                                user_index))
                 # duplicate all connectors for duplicated app with all attributes
-                app_set_connector_requests, app_connectors_attr_updates = self._duplicate_app_connectors(
-                    app, app_connectors, new_app_name)
+                app_set_connector_requests, app_connectors_attr_updates = \
+                    self._duplicate_app_connectors(app, app_connectors[app.Name], new_app_name)
 
                 set_connector_requests.extend(app_set_connector_requests)
                 connectors_attr_updates.extend(app_connectors_attr_updates)
 
-        # run update requests
+        # run bulk update requests
         if app_edit_requests:
             api.EditAppsInReservation(sandbox_id, app_edit_requests)
         if set_connector_requests:
@@ -139,13 +120,14 @@ class PrepareEnvironmentLogic:
 
         return connectors_attr_updates
 
-    def _duplicate_app_connectors(self, app: ReservationAppResource, app_connectors: Dict[str, List[Connector]],
-                                  new_app_name: str) \
-            -> Tuple[List[SetConnectorRequest], List[ConnectorsAttrUpdateRequest]]:
+    # todo move to components service?
+    def _duplicate_app_connectors(self, app: ReservationAppResource, app_connectors: List[Connector],
+                                  new_app_name: str) -> Tuple[List[SetConnectorRequest],
+                                                              List[ConnectorsAttrUpdateRequest]]:
         # Copy all attribute values for connectors including vnic requests set before
         set_connector_requests = []
         connectors_attr_updates = []
-        for connector in app_connectors[app.Name]:
+        for connector in app_connectors:
             atts_with_values = [AttributeNameValue(att.Name, att.Value) for att in
                                 connector.Attributes if att.Value]
             source = None
@@ -174,43 +156,34 @@ class PrepareEnvironmentLogic:
         new_app = api.AddAppToReservation(reservationId=sandbox_id, appName=app.AppTemplateName,
                                           positionX=new_app_pos.X, positionY=new_app_pos.Y)
 
+        # todo - update all attributes in new app from original app. At the moment we only update Private IP attr but
+        #  if other attributes were changed on the reservation app the duplicate will not get it because we are adding
+        #  the duplicate from the app template
         new_private_ip_attr_val = self._get_private_ip_value_for_duplicate_app(app, user_index)
+
         attributes_to_update = [NameValuePair(PRIVATE_IP_ATTR, new_private_ip_attr_val)] \
             if new_private_ip_attr_val else []
 
         # update new app with new name and with updated value to Private IP attribute
-        return self._apps_service.create_update_app_request(new_app.ReservedAppName,
-                                                            new_app_name,
-                                                            self._apps_service.get_default_deployment_option(app),
-                                                            attributes_to_update)
+        return self._components_service.create_update_app_request(
+            new_app.ReservedAppName, new_app_name, self._components_service.get_default_deployment_option(app),
+            attributes_to_update)
 
     def _calculate_duplicate_app_position(self, app_pos: Position, user_index: int) -> Position:
         return Position(app_pos.X, app_pos.Y + 100 * (user_index + 1))
 
-    # todo move to IPs service?
     def _get_private_ip_value_for_duplicate_app(self, app: ReservationAppResource, user_index: int) -> str:
-        default_deployment_path = self._apps_service.get_default_deployment_option(app)
-        requested_ips_string = self._apps_service.get_deployment_attribute_value(default_deployment_path,
-                                                                                 PRIVATE_IP_ATTR)
+        default_deployment_path = self._components_service.get_default_deployment_option(app)
+        requested_ips_string = self._components_service.get_deployment_attribute_value(default_deployment_path,
+                                                                                       PRIVATE_IP_ATTR)
         if not requested_ips_string:
             return None
-
-        # calculate increment
-        increment = self._calculate_IP_increment(user_index)
 
         # todo - add validation to check if we have a range bigger then the increment
 
         self._sandbox_output.debug_print(f'original ip for {app.Name} it is: {requested_ips_string}')
-        requested_ips = requested_ips_string.split(";")
-
-        new_ips = []
-
-        for ip in requested_ips:
-            # todo - should we add support for specific additional multiple IPs (in addition to range)
-            new_ip_str = self._ips_handler.increment_ip(ip, increment)
-            new_ips.append(new_ip_str)
-
-        incremented_ips_string = ';'.join(new_ips)
+        incremented_ips_string = self._ips_increment_provider.increment_requested_ips_string(
+            requested_ips_string, self._config.app_duplicate_increment_octet, self._calculate_IP_increment(user_index))
         self._sandbox_output.debug_print(f"incremented requested ips: {incremented_ips_string}")
 
         return incremented_ips_string
@@ -219,86 +192,54 @@ class PrepareEnvironmentLogic:
         increment = (user_index + 1) * self._config.app_duplicate_ip_increment
         return increment
 
-    def _prepare_requested_vnic_attr_connector_changes(self, app_connectors: Dict[str, List[Connector]],
+    def _prepare_requested_vnic_attr_connector_changes(self, app_to_connectors_dict: Dict[str, List[Connector]],
                                                        sandbox_details: ReservationDescriptionInfo) \
             -> List[ConnectorsAttrUpdateRequest]:
+
         connectors_attr_updates = []
 
         for app in sandbox_details.Apps:
-            has_existing_vnic_req = False
-            # If more than one connector - we should worry about vnic request
-            if self._does_app_has_multiple_connectors(app.Name, app_connectors):
-                connectors = app_connectors[app.Name]
-                # Check for mgmt connector based on name convention for service
-                mgmt_connector = next((connector for connector in connectors if
-                                       (connector.Source.lower() in MGMT_SERVICE_NAMES) or
-                                       (connector.Target.lower() in MGMT_SERVICE_NAMES)), None)
+            # If more than one connector - we should check about vnic request
+            if not self._does_app_has_multiple_connectors(app.Name, app_to_connectors_dict):
+                continue
 
-                for connector in connectors:
-                    vnic_request_att = self._get_requested_vnic_attribute(connector, app)
-                    # if someone specified a vnic - ignore this
-                    if vnic_request_att and vnic_request_att.Value:
-                        has_existing_vnic_req = True
+            connectors = app_to_connectors_dict[app.Name]
 
-                # todo - review this logic with Roni
-                #  Refactor item #1 - set vNic id for management network
-                if mgmt_connector and not has_existing_vnic_req:
-                    self._sandbox_output.debug_print(f'Setting management connection for {app.Name}')
-                    attribute_name = self._get_requested_vnic_attribute_name(mgmt_connector, app)
-                    attribute_info = AttributeNameValue(attribute_name, '0')
-                    mgmt_connector.Attributes.append(attribute_info)
+            mgmt_connector = self._components_service.get_managment_connector(connectors)
+            if not mgmt_connector:
+                # if not mgmt connector we will not update requested vNIC attr
+                continue
+
+            # check if we have at least one vnic request in all app connectors
+            has_existing_vnic_req = self._components_service.does_connector_has_existing_vnic_req(app, connectors)
+            if has_existing_vnic_req:
+                self._sandbox_output.notify(f"Requested vNICs will not be changed for {app.Name} because "
+                                            f"an existing value was detected on one or more connectors")
+                continue
+
+            # if we detected a management connector and Requested vNIC was not set on any connector then we set
+            # the management connector with index 0 and explicitly assign consecutive index values to all other
+            # connectors for current app
+            if mgmt_connector and not has_existing_vnic_req:
+                self._sandbox_output.debug_print(f'Setting management connection for {app.Name}')
+                connectors_attr_updates.append(
+                    self._prepare_connector_change_req(app, mgmt_connector, '0'))
+
+                for index, connector in enumerate(connectors):
+                    if connector == mgmt_connector:
+                        continue
+                    vnic_index = index + 1
                     connectors_attr_updates.append(
-                        ConnectorsAttrUpdateRequest(mgmt_connector.Source, mgmt_connector.Target, [attribute_info]))
-
-                    # todo at the moment the code overrides the 'vnic name' attribute, but instead of override we want
-                    #  to only to close the gaps. Similar to what the aws shell should be doing.
-                    vnic_index = 1
-                    for connector in connectors:
-                        if connector == mgmt_connector:
-                            continue
-                        attribute_name = self._get_requested_vnic_attribute_name(connector, app)
-                        attribute_info = AttributeNameValue(attribute_name, str(vnic_index))
-                        connector.Attributes.append(attribute_info)
-                        connectors_attr_updates.append(
-                            ConnectorsAttrUpdateRequest(connector.Source, connector.Target, [attribute_info]))
-                        vnic_index = vnic_index + 1
+                        self._prepare_connector_change_req(app, connector, str(vnic_index)))
 
         return connectors_attr_updates
 
+    def _prepare_connector_change_req(self, app: ReservationAppResource, connector: Connector,
+                                      req_vNIC_name_value: str) -> ConnectorsAttrUpdateRequest:
+        attribute_name = self._components_service.get_requested_vnic_attribute_name(connector, app)
+        attribute_info = AttributeNameValue(attribute_name, req_vNIC_name_value)
+        connector.Attributes.append(attribute_info)
+        return ConnectorsAttrUpdateRequest(connector.Source, connector.Target, [attribute_info])
+
     def _does_app_has_multiple_connectors(self, app_name: str, app_connectors: Dict[str, List[Connector]]) -> bool:
         return app_name in app_connectors and len(app_connectors[app_name]) > 1
-
-    def _get_service_or_app_name_to_position_dict(self, api: CloudShellAPISession, sandbox_id: str) -> \
-            Dict[str, Position]:
-        service_positions = api.GetReservationServicesPositions(sandbox_id).ResourceDiagramLayouts
-        service_positions_dict = {service.ResourceName: Position(service.X, service.Y) for service in service_positions}
-        return service_positions_dict
-
-    def _get_apps_to_connectors_dict(self, apps: List[ReservationAppResource],
-                                     sandbox_details: ReservationDescriptionInfo,
-                                     services_dict: Dict[str, ServiceInstance]) -> Dict[str, List[Connector]]:
-        app_connectors = {}
-        for app in apps:
-            app_connectors[app.Name] = []
-            for connector in sandbox_details.Connectors:
-                # All connectors connected to the app and services (not connectors between resources)
-                if (connector.Source == app.Name and connector.Target in services_dict) or \
-                        (connector.Target == app.Name and connector.Source in services_dict):
-                    app_connectors[app.Name].append(connector)
-            self._sandbox_output.debug_print(
-                f'connectors detected for app {app.Name} are {len(app_connectors[app.Name])}')
-        return app_connectors
-
-    def _get_requested_vnic_attribute_name(self, connector, app):
-        if app.Name == connector.Source:
-            return 'Requested Source vNIC Name'
-        if app.Name == connector.Target:
-            return 'Requested Target vNIC Name'
-        return None
-
-    def _get_requested_vnic_attribute(self, connector, app):
-        attr_name = self._get_requested_vnic_attribute_name(connector, app)
-        for attr in connector.Attributes:
-            if attr.Name == attr_name:
-                return attr
-        return None

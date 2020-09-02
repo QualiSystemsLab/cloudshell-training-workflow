@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock
 
-from cloudshell.orch.training.services.apps import AppsService
+from cloudshell.orch.training.services.sandbox_components import SandboxComponentsService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 
 
@@ -11,7 +11,7 @@ class TestAppsService(unittest.TestCase):
     def setUp(self) -> None:
         self.sandbox = Mock()
         sandbox_output_service = Mock()
-        self.apps_service = AppsService(sandbox_output_service)
+        self.apps_service = SandboxComponentsService(sandbox_output_service)
 
     def test_should_share_app_return_true(self):
         # arrange

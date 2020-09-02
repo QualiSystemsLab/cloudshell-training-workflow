@@ -3,12 +3,12 @@ from cloudshell.workflow.orchestration.setup.default_setup_orchestrator import D
 
 from cloudshell.orch.training.parsers.sandbox_inputs_processing import SandboxInputsParser
 from cloudshell.orch.training.logic.create_user_sandboxes import UserSandboxesLogic
-from cloudshell.orch.training.logic.prepare_env import PrepareEnvironmentLogic
+from cloudshell.orch.training.logic.initialize_env import InitializeEnvironmentLogic
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
-from cloudshell.orch.training.services.apps import AppsService
+from cloudshell.orch.training.services.sandbox_components import SandboxComponentsService
 from cloudshell.orch.training.services.email import EmailService
-from cloudshell.orch.training.services.ips_handler import IPsHandlerService
+from cloudshell.orch.training.services.ips_handler import IPsHandlerService, RequestedIPsIncrementProvider
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
 from cloudshell.orch.training.services.sandbox_create import SandboxCreateService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
@@ -25,41 +25,50 @@ class TrainingSetupWorkflow(object):
         # bootstrap setup workflow data and services
         self._bootstrap()
 
+
     # todo - consider moving to a bootstrap class
     def _bootstrap(self):
         self.sandbox.logger.info("Bootstrapping setup workflow")
 
+        # parse sandbox inputs
         self.env_data = SandboxInputsParser.parse_sandbox_inputs(self.sandbox)
+
+        # init services
+        self._users_data_manager = UsersDataManagerService(self.sandbox)
         sandbox_output_service = SandboxOutputService(self.sandbox, self.env_data.debug_enabled)
-        users_data_manager = UsersDataManagerService(self.sandbox)
         sandbox_create_service = SandboxCreateService(self.sandbox.automation_api, sandbox_output_service)
         sandbox_api_service = SandboxAPIService(self.sandbox, self.config.sandbox_api_port, sandbox_output_service)
         email_service = EmailService(self.config.email_config, sandbox_output_service, self.sandbox.logger)
         student_links_provider = StudentLinksProvider(self.config.training_portal_base_url, self.sandbox,
                                                       sandbox_api_service)
-        apps_service = AppsService(sandbox_output_service)
+        apps_service = SandboxComponentsService(sandbox_output_service)
         users_service = UsersService(self.sandbox.automation_api, self.sandbox.logger)
-        ips_handler_service = IPsHandlerService()
+        ips_increment_service = RequestedIPsIncrementProvider(IPsHandlerService(), self.sandbox.logger)
 
-        self.user_sandbox_logic = UserSandboxesLogic(self.env_data, sandbox_output_service, users_data_manager,
+        # init logic
+        self.user_sandbox_logic = UserSandboxesLogic(self.env_data, sandbox_output_service, self._users_data_manager,
                                                      sandbox_create_service, email_service, student_links_provider,
                                                      apps_service)
+        self.init_logic = InitializeEnvironmentLogic(self.env_data, self.config, self._users_data_manager,
+                                                     sandbox_output_service, apps_service, sandbox_create_service,
+                                                     users_service, ips_increment_service)
 
-        self.preparation_logic = PrepareEnvironmentLogic(self.env_data, self.config, users_data_manager,
-                                                         sandbox_output_service, apps_service, sandbox_create_service,
-                                                         users_service, ips_handler_service)
-
-    def prepare_environment_and_register(self, enable_provisioning: bool = True, enable_connectivity: bool = True,
-                                         enable_configuration: bool = True):
-        self.prepare_environment()
+    def initialize_and_register(self, enable_provisioning: bool = True, enable_connectivity: bool = True,
+                                enable_configuration: bool = True):
+        self.initialize()
         self.register(enable_provisioning, enable_connectivity, enable_configuration)
 
-    def prepare_environment(self):
+    # todo - rename to make it less confusing because we already have a prepare stage
+    def initialize(self):
         """
         Prepare the sandbox environment before sandbox execution
         """
+        # load sandbox data
+        self._users_data_manager.load()
+        # todo - add save for the UsersDataManagerService at end of setup workflow
+
         # prepare environment before setup execution
-        self.preparation_logic.prepare_environment(self.sandbox)
+        self.init_logic.prepare_environment(self.sandbox)
 
     def register(self, enable_provisioning: bool = True, enable_connectivity: bool = True,
                  enable_configuration: bool = True):
