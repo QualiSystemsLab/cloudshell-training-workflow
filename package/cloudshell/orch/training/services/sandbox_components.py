@@ -12,13 +12,10 @@ FALSEY_STRINGS = ['no', 'false', '0']
 MGMT_SERVICE_NAMES = ['mgmt', 'management', 'mgt']
 
 
-class SandboxComponentsService:
+class SandboxComponentsHelperService:
 
     def __init__(self, sandbox_output_service: SandboxOutputService):
         self._sandbox_output = sandbox_output_service
-
-    # def is_deployed_app(self, deployed_app: ReservedResourceInfo) -> bool:
-    #     return isinstance(deployed_app.VmDetails, ResourceInfoVmDetails)  # true if deployed app or static VM
 
     def should_share_app(self, app: ReservationAppResource) -> bool:
         return not self.should_duplicate_app(app)
@@ -39,13 +36,13 @@ class SandboxComponentsService:
 
     def get_default_deployment_option(self, app: ReservationAppResource) -> DeploymentPathInfo:
         default_deployment_path = next(
-            [deployment_path for deployment_path in app.DeploymentPaths if deployment_path.IsDefault],
+            iter([deployment_path for deployment_path in app.DeploymentPaths if deployment_path.IsDefault]),
             None)
         return default_deployment_path
 
     def get_deployment_attribute_value(self, deployment: DeploymentPathInfo, attribute_name: str) -> str:
         return next(
-            [attr.Value for attr in deployment.DeploymentService.Attributes if attr.Name == attribute_name],
+            iter([attr.Value for attr in deployment.DeploymentService.Attributes if attr.Name == attribute_name]),
             None)
 
     def create_update_app_request(self, app_name: str, new_app_name: str, default_deployment_path: DeploymentPathInfo,
@@ -75,7 +72,7 @@ class SandboxComponentsService:
                 return attr
         return None
 
-    def get_managment_connector(self, connectors: List[Connector]) -> Connector:
+    def get_management_connector(self, connectors: List[Connector]) -> Connector:
         mgmt_connector = next((connector for connector in connectors if
                                (connector.Source.lower() in MGMT_SERVICE_NAMES) or
                                (connector.Target.lower() in MGMT_SERVICE_NAMES)), None)
@@ -92,7 +89,7 @@ class SandboxComponentsService:
                 if (connector.Source == app.Name and connector.Target in services_dict) or \
                         (connector.Target == app.Name and connector.Source in services_dict):
                     app_connectors[app.Name].append(connector)
-            self._logger.debug(
+            self._sandbox_output.debug_print(
                 f'connectors detected for app {app.Name} are {len(app_connectors[app.Name])}')
         return app_connectors
 

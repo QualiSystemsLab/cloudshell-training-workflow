@@ -6,7 +6,7 @@ from cloudshell.orch.training.logic.create_user_sandboxes import UserSandboxesLo
 from cloudshell.orch.training.logic.initialize_env import InitializeEnvironmentLogic
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
-from cloudshell.orch.training.services.sandbox_components import SandboxComponentsService
+from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
 from cloudshell.orch.training.services.email import EmailService
 from cloudshell.orch.training.services.ip import IPsHandlerService, RequestedIPsIncrementProvider
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
@@ -25,7 +25,6 @@ class TrainingSetupWorkflow(object):
         # bootstrap setup workflow data and services
         self._bootstrap()
 
-
     # todo - consider moving to a bootstrap class
     def _bootstrap(self):
         self.sandbox.logger.info("Bootstrapping setup workflow")
@@ -41,7 +40,7 @@ class TrainingSetupWorkflow(object):
         email_service = EmailService(self.config.email_config, sandbox_output_service, self.sandbox.logger)
         student_links_provider = StudentLinksProvider(self.config.training_portal_base_url, self.sandbox,
                                                       sandbox_api_service)
-        apps_service = SandboxComponentsService(sandbox_output_service)
+        apps_service = SandboxComponentsHelperService(sandbox_output_service)
         users_service = UsersService(self.sandbox.automation_api, self.sandbox.logger)
         ips_increment_service = RequestedIPsIncrementProvider(IPsHandlerService(), self.sandbox.logger)
 
@@ -58,14 +57,12 @@ class TrainingSetupWorkflow(object):
         self.initialize()
         self.register(enable_provisioning, enable_connectivity, enable_configuration)
 
-    # todo - rename to make it less confusing because we already have a prepare stage
     def initialize(self):
         """
         Prepare the sandbox environment before sandbox execution
         """
         # load sandbox data
         self._users_data_manager.load()
-        # todo - add save for the UsersDataManagerService at end of setup workflow
 
         # prepare environment before setup execution
         self.init_logic.prepare_environment(self.sandbox)
@@ -88,4 +85,10 @@ class TrainingSetupWorkflow(object):
 
         if self.env_data.instructor_mode:
             self.sandbox.logger.debug("Create user sandboxes logic is added to sandbox orchestration")
-            self.sandbox.workflow.on_configuration_ended(self.user_sandbox_logic.create_user_sandboxes, None)
+            self.sandbox.workflow.on_configuration_ended(self._do_on_configuration_ended, None)
+
+    def _do_on_configuration_ended(self, sandbox, components):
+        self.user_sandbox_logic.create_user_sandboxes(sandbox, components)
+        # persist to sandbox data the users data
+        self._users_data_manager.save()
+

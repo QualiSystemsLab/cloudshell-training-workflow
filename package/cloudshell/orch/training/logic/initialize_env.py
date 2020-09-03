@@ -9,7 +9,7 @@ from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.position import Position
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
-from cloudshell.orch.training.services.sandbox_components import SandboxComponentsService
+from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
 from cloudshell.orch.training.services.ip import RequestedIPsIncrementProvider
 from cloudshell.orch.training.services.sandbox_create import SandboxCreateService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
@@ -19,14 +19,14 @@ from cloudshell.orch.training.services.users_data_manager import UsersDataManage
 
 PRIVATE_IP_ATTR = "Private IP"
 
-ConnectorsAttrUpdateRequest = namedtuple('ConnectorsAttrUpdateRequest', ['Souurce', 'Target', 'AttributeRequests'])
+ConnectorsAttrUpdateRequest = namedtuple('ConnectorsAttrUpdateRequest', ['Source', 'Target', 'AttributeRequests'])
 
 
 class InitializeEnvironmentLogic:
 
     def __init__(self, env_data: TrainingEnvironmentDataModel, config: TrainingWorkflowConfig,
                  users_data_manager: UsersDataManagerService, sandbox_output_service: SandboxOutputService,
-                 sandbox_components_service: SandboxComponentsService, sandbox_service: SandboxCreateService,
+                 sandbox_components_service: SandboxComponentsHelperService, sandbox_service: SandboxCreateService,
                  users_service: UsersService, ips_increment_provider: RequestedIPsIncrementProvider):
         self._env_data = env_data
         self._config = config
@@ -78,7 +78,7 @@ class InitializeEnvironmentLogic:
 
         # execute bulk update for connector attributes
         for att_change in connectors_attr_updates:
-            api.SetConnectorAttributes(sandbox.id, att_change.Souurce, att_change.Target, att_change.AttributeRequests)
+            api.SetConnectorAttributes(sandbox.id, att_change.Source, att_change.Target, att_change.AttributeRequests)
 
     def _duplicate_apps(self, api: CloudShellAPISession, apps: List[ReservationAppResource],
                         app_connectors: Dict[str, List[Connector]], sandbox_id: str) \
@@ -107,7 +107,7 @@ class InitializeEnvironmentLogic:
                                                                user_index))
                 # duplicate all connectors for duplicated app with all attributes
                 app_set_connector_requests, app_connectors_attr_updates = \
-                    self._duplicate_app_connectors(app, app_connectors[app.Name], new_app_name)
+                    self._create_duplicate_app_connectors_requests(app, app_connectors[app.Name], new_app_name)
 
                 set_connector_requests.extend(app_set_connector_requests)
                 connectors_attr_updates.extend(app_connectors_attr_updates)
@@ -121,8 +121,8 @@ class InitializeEnvironmentLogic:
         return connectors_attr_updates
 
     # todo move to components service?
-    def _duplicate_app_connectors(self, app: ReservationAppResource, app_connectors: List[Connector],
-                                  new_app_name: str) -> Tuple[List[SetConnectorRequest],
+    def _create_duplicate_app_connectors_requests(self, app: ReservationAppResource, app_connectors: List[Connector],
+                                                  new_app_name: str) -> Tuple[List[SetConnectorRequest],
                                                               List[ConnectorsAttrUpdateRequest]]:
         # Copy all attribute values for connectors including vnic requests set before
         set_connector_requests = []
@@ -189,8 +189,7 @@ class InitializeEnvironmentLogic:
         return incremented_ips_string
 
     def _calculate_IP_increment(self, user_index):
-        increment = (user_index + 1) * self._config.app_duplicate_ip_increment
-        return increment
+        return (user_index + 1) * self._config.app_duplicate_ip_increment
 
     def _prepare_requested_vnic_attr_connector_changes(self, app_to_connectors_dict: Dict[str, List[Connector]],
                                                        sandbox_details: ReservationDescriptionInfo) \
@@ -205,7 +204,7 @@ class InitializeEnvironmentLogic:
 
             connectors = app_to_connectors_dict[app.Name]
 
-            mgmt_connector = self._components_service.get_managment_connector(connectors)
+            mgmt_connector = self._components_service.get_management_connector(connectors)
             if not mgmt_connector:
                 # if not mgmt connector we will not update requested vNIC attr
                 continue

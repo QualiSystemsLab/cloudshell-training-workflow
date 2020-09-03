@@ -7,7 +7,7 @@ from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.position import Position
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
-from cloudshell.orch.training.services.sandbox_components import SandboxComponentsService
+from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
 from cloudshell.orch.training.services.email import EmailService
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
 from cloudshell.orch.training.services.sandbox_create import SandboxCreateService
@@ -22,7 +22,7 @@ class UserSandboxesLogic:
     def __init__(self, env_data: TrainingEnvironmentDataModel, sandbox_output_service: SandboxOutputService,
                  users_data_manager: UsersDataManagerService, sandbox_create_service: SandboxCreateService,
                  email_service: EmailService, student_links_provider: StudentLinksProvider,
-                 apps_service: SandboxComponentsService):
+                 apps_service: SandboxComponentsHelperService):
         self._env_data = env_data
         self._sandbox_output = sandbox_output_service
         self._users_data = users_data_manager

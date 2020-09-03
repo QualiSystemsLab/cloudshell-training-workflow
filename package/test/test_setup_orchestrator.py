@@ -25,7 +25,7 @@ class TestTrainingSetupWorkflow(unittest.TestCase):
         self.sandbox.workflow.add_to_configuration.assert_called_once_with(
             self.setup.default_setup_workflow.default_configuration, None)
         self.sandbox.workflow.on_configuration_ended.assert_called_once_with(
-            self.setup.user_sandbox_logic.create_user_sandboxes, None)
+            self.setup._do_on_configuration_ended, None)
 
     @patch('cloudshell.orch.training.setup_orchestrator.UsersDataManagerService')
     def test_initialize(self, users_data_manager_class):
