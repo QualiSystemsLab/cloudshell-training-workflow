@@ -18,7 +18,7 @@ class TestTeardownUserSandboxes(unittest.TestCase):
 
         self.training_env = Mock()
 
-        self.logic = SandboxTerminateLogic(self.sandbox,self.sandbox_output_service,self.sandbox_api,self.users_data_manager,self.sandbox_termination_service,self.training_env)
+        self.logic = SandboxTerminateLogic(self.sandbox,self.sandbox_output_service,self.sandbox_api,self.users_data_manager,self.training_env)
 
 
     def test_teardown_student_sandboxes(self):
