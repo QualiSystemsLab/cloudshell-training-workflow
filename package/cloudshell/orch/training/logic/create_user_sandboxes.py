@@ -9,7 +9,7 @@ from cloudshell.orch.training.models.position import Position
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
 from cloudshell.orch.training.services.email import EmailService
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
-from cloudshell.orch.training.services.sandbox_create import SandboxCreateService
+from cloudshell.orch.training.services.sandbox_lifecycle import SandboxCreateService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 from cloudshell.orch.training.services.student_links import StudentLinksProvider
 from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService,\

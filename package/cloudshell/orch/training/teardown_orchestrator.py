@@ -9,8 +9,10 @@ from cloudshell.orch.training.services.users_data_manager import UsersDataManage
 
 
 class TrainingTeardownWorkflow(object):
-    def __init__(self):
+    def __init__(self, sandbox: Sandbox):
+        self.config = None
         self.default_teardown_workflow = DefaultTeardownWorkflow()
+        self._bootstrap(sandbox)
 
     def _bootstrap(self, sandbox: Sandbox):
         sandbox.logger.info("Bootstrapping teardown workflow")
@@ -27,6 +29,5 @@ class TrainingTeardownWorkflow(object):
         :param Sandbox sandbox:
         :return:
         """
-        self._bootstrap(sandbox)
         sandbox.logger.info("Adding default teardown orchestration")
-        sandbox.workflow.add_to_teardown( self._sandbox_terminator.teardown_student_sandboxes(), None)
+        sandbox.workflow.add_to_teardown( self._sandbox_terminator.teardown_student_sandboxes, None)
