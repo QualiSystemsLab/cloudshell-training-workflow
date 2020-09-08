@@ -1,6 +1,7 @@
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.workflow.orchestration.teardown.default_teardown_orchestrator import DefaultTeardownWorkflow
 
+from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.parsers.sandbox_inputs_processing import SandboxInputsParser
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
@@ -9,8 +10,8 @@ from cloudshell.orch.training.services.users_data_manager import UsersDataManage
 
 
 class TrainingTeardownWorkflow(object):
-    def __init__(self, sandbox: Sandbox):
-        self.config = None
+    def __init__(self, sandbox: Sandbox, config: TrainingWorkflowConfig = None):
+        self.config = config if config else TrainingWorkflowConfig()
         self.default_teardown_workflow = DefaultTeardownWorkflow()
         self._bootstrap(sandbox)
 

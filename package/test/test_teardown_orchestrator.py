@@ -1,21 +1,22 @@
 import unittest
+from mock import Mock, MagicMock , patch
 
-from mock import Mock, MagicMock
-
-from cloudshell.orch.training.models.config import TrainingWorkflowConfig
-from cloudshell.orch.training.setup_orchestrator import TrainingSetupWorkflow
+from cloudshell.orch.training.teardown_orchestrator import TrainingTeardownWorkflow
 
 
 class TestTrainingTeardownWorkflow(unittest.TestCase):
+    def setUp(self) -> None:
+        self.sandbox = Mock()
+        self.sandbox.global_inputs = {"Training Users": "test@test"}
+        self.logic = TrainingTeardownWorkflow(self.sandbox)
+
 
     def test_register(self):
         # arrange
-        #config = Mock(spec=TrainingWorkflowConfig())
-        #setup = TrainingSetupWorkflow(config)
-        sandbox = Mock()
 
         # act
-
+        self.logic.register(self.sandbox)
 
         # assert
+        self.sandbox.workflow.add_to_teardown.assert_called_once()
 
