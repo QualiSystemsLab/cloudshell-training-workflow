@@ -123,7 +123,7 @@ class TestSandboxTerminateService(unittest.TestCase):
         instructor_and_student_resources_mock = Mock()
 
         instructor_and_student_resources_mock.Name = "resource_name"
-        instructor_and_student_resources_mock.VmDetails = None
+        instructor_and_student_resources_mock.VmDetails = "vm"
         instructor_reservation_details_mock = Mock()
         instructor_reservation_details_mock.ReservationDescription.Resources = [instructor_and_student_resources_mock]
         self.sandbox.automation_api.GetReservationDetails = Mock(return_value=instructor_reservation_details_mock)
