@@ -30,7 +30,9 @@ class TestTeardownUserSandboxes(unittest.TestCase):
         self.logic._delete_students_group = Mock()
 
         # act
+        self.logic._sandbox_termination_service = Mock()
         self.logic.teardown_student_sandboxes()
+
 
         # assert
         self.logic._sandbox_termination_service.end_student_reservation.assert_has_calls([call('user1'),call('user2')])
