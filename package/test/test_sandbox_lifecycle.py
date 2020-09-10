@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock, patch
 
-from cloudshell.orch.training.services.sandbox_lifecycle import SandboxCreateService, SandboxTerminateService
+from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
 
 
 class TestSandboxCreateService(unittest.TestCase):
@@ -14,7 +14,8 @@ class TestSandboxCreateService(unittest.TestCase):
         new_reservation = Mock()
         sandbox.automation_api.CreateImmediateTopologyReservation = Mock(return_value=new_reservation)
         sandbox_output = Mock()
-        sandbox_create_service = SandboxCreateService(sandbox, sandbox_output)
+        user_data_manager = Mock()
+        sandbox_create_service = SandboxLifecycleService(sandbox, sandbox_output, user_data_manager)
         user = Mock()
         user_id = Mock()
         duration = Mock()
@@ -32,7 +33,7 @@ class TestSandboxCreateService(unittest.TestCase):
         sandbox.automation_api.GetReservationStatus = Mock(side_effect=[self._get_res_status_mock('Started', 'bla1'),
                                                                         self._get_res_status_mock('Started', 'bla2'),
                                                                         self._get_res_status_mock('Started', 'Ready')])
-        sandbox_create_service = SandboxCreateService(sandbox, Mock())
+        sandbox_create_service = SandboxLifecycleService(sandbox, Mock())
 
         # act & assert
         sandbox_create_service.wait_ready(Mock(), Mock())
@@ -43,7 +44,7 @@ class TestSandboxCreateService(unittest.TestCase):
         sandbox = Mock(automation_api=Mock())
         sandbox.automation_api.GetReservationStatus = Mock(side_effect=[self._get_res_status_mock('Started', 'bla1'),
                                                                         self._get_res_status_mock('Started', 'Error')])
-        sandbox_create_service = SandboxCreateService(sandbox, Mock())
+        sandbox_create_service = SandboxLifecycleService(sandbox, Mock())
 
         # act & assert
         with self.assertRaises(Exception):
@@ -55,7 +56,7 @@ class TestSandboxCreateService(unittest.TestCase):
         sandbox = Mock(automation_api=Mock())
         sandbox.automation_api.GetReservationStatus = Mock(side_effect=[self._get_res_status_mock('Started', 'bla1'),
                                                                         self._get_res_status_mock('Teardown', 'bla2')])
-        sandbox_create_service = SandboxCreateService(sandbox, Mock())
+        sandbox_create_service = SandboxLifecycleService(sandbox, Mock())
 
         # act & assert
         with self.assertRaises(Exception):
@@ -67,7 +68,7 @@ class TestSandboxCreateService(unittest.TestCase):
         sandbox = Mock(automation_api=Mock())
         sandbox.automation_api.GetReservationStatus = Mock(side_effect=[self._get_res_status_mock('Started', 'bla1'),
                                                                         self._get_res_status_mock('Completed', 'bla2')])
-        sandbox_create_service = SandboxCreateService(sandbox, Mock())
+        sandbox_create_service = SandboxLifecycleService(sandbox, Mock())
 
         # act & assert
         with self.assertRaises(Exception):
@@ -84,7 +85,7 @@ class TestSandboxTerminateService(unittest.TestCase):
         self.sandbox_output_service = Mock()
         self.users_data_manager = Mock()
         self.admin_login_token = Mock()
-        self.logic = SandboxTerminateService(self.sandbox, self.sandbox_output_service,self.users_data_manager)
+        self.logic = SandboxLifecycleService(self.sandbox, self.sandbox_output_service,self.users_data_manager)
 
     def test_end_student_reservation_already_complete(self):
         # arrange

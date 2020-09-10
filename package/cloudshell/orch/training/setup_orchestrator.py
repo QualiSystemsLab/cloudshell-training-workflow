@@ -7,7 +7,7 @@ from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
 from cloudshell.orch.training.services.email import EmailService
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
-from cloudshell.orch.training.services.sandbox_lifecycle import SandboxCreateService
+from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 from cloudshell.orch.training.services.student_links import StudentLinksProvider
 from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService
@@ -27,7 +27,7 @@ class TrainingSetupWorkflow(object):
 
         sandbox_output_service = SandboxOutputService(sandbox, env_data.debug_enabled)
         users_data_manager = UsersDataManagerService(sandbox)
-        sandbox_create_service = SandboxCreateService(sandbox, sandbox_output_service)
+        sandbox_create_service = SandboxLifecycleService(sandbox, sandbox_output_service)
         sandbox_api_service = SandboxAPIService(sandbox, self.config.sandbox_api_port, sandbox_output_service)
         email_service = EmailService(self.config.email_config, sandbox_output_service, sandbox.logger)
         student_links_provider = StudentLinksProvider(self.config.training_portal_base_url, sandbox, sandbox_api_service)

@@ -8,11 +8,12 @@ from cloudshell.orch.training.services.users_data_manager import UsersDataManage
     UsersDataManagerServiceKeys as userDataKeys
 
 
-class SandboxCreateService:
+class SandboxLifecycleService:
 
-    def __init__(self, sandbox: Sandbox, sandbox_output: SandboxOutputService):
+    def __init__(self, sandbox: Sandbox, sandbox_output: SandboxOutputService,users_data_manager: UsersDataManagerService):
         self._sandbox = sandbox
         self._sandbox_output = sandbox_output
+        self._users_data_manager = users_data_manager
 
     def create_trainee_sandbox(self, user: str, user_id: str, duration: int) -> ReservationShortInfo:
         new_sandbox = self._sandbox.automation_api.CreateImmediateTopologyReservation(
@@ -50,23 +51,14 @@ class SandboxCreateService:
             if user_sandbox_status.ReservationSlimStatus.Status == 'Completed':
                 raise Exception('Cannot create student sandbox')
 
-class SandboxTerminateService:
-
-    def __init__(self, sandbox: Sandbox, sandbox_output: SandboxOutputService,users_data_manager: UsersDataManagerService):
-        self._sandbox = sandbox
-        self._sandbox_output = sandbox_output
-        self._users_data_manager = users_data_manager
-
     def end_student_reservation(self, user: str) -> None:
         api = self._sandbox.automation_api
-        self._users_data_manager.load()
 
         user_reservation_id = self._users_data_manager.get_key(user, userDataKeys.SANDBOX_ID)
         user_reservation_status = api.GetReservationStatus(user_reservation_id).ReservationSlimStatus.Status
         self._sandbox_output.debug_print(f'Student reservation status is: {user_reservation_status}')
 
         #If student (user) reservation has not ended yet -> remove the resources that are shared with the Instructor and than End the reservation
-        # if user_reservation_status != 'Completed':
         if user_reservation_status == 'Completed':
             return
 
@@ -83,3 +75,11 @@ class SandboxTerminateService:
             api.RemoveResourcesFromReservation(user_reservation_id, student_shared_apps)
 
         api.EndReservation(user_reservation_id)
+
+class SandboxTerminateService:
+
+    def __init__(self, sandbox: Sandbox, sandbox_output: SandboxOutputService,users_data_manager: UsersDataManagerService):
+        self._sandbox = sandbox
+        self._sandbox_output = sandbox_output
+        self._users_data_manager = users_data_manager
+
