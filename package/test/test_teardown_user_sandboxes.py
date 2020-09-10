@@ -15,10 +15,10 @@ class TestTeardownUserSandboxes(unittest.TestCase):
         self.admin_login_token = Mock()
         self.sandbox_api.login = Mock(return_value=self.admin_login_token)
         self.sandbox_termination_service = Mock()
-
+        self.sandbox_lifecycle_service = Mock()
         self.training_env = Mock()
 
-        self.logic = SandboxTerminateLogic(self.sandbox,self.sandbox_output_service,self.sandbox_api,self.users_data_manager,self.training_env)
+        self.logic = SandboxTerminateLogic(self.sandbox,self.sandbox_output_service,self.sandbox_api,self.sandbox_lifecycle_service,self.users_data_manager,self.training_env)
 
 
     def test_teardown_student_sandboxes(self):
