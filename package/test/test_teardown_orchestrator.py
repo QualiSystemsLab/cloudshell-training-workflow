@@ -22,6 +22,9 @@ class TestTrainingTeardownWorkflow(unittest.TestCase):
         self.logic.register(self.sandbox)
 
         # assert
-        self.sandbox.workflow.add_to_teardown.assert_has_calls([call(self.logic.default_teardown_workflow.default_teardown,None),call(  self.logic._sandbox_terminator.teardown_student_sandboxes,None)])
+
+        self.sandbox.workflow.add_to_teardown.assert_called_with(  self.logic._sandbox_terminator.teardown_student_sandboxes,None)
+        self.sandbox.workflow.before_teardown_started.assert_called_with(self.logic.default_teardown_workflow.default_teardown,None)
+        #self.sandbox.workflow.add_to_teardown.assert_has_calls([call(self.logic.default_teardown_workflow.default_teardown,None),call(  self.logic._sandbox_terminator.teardown_student_sandboxes,None)])
 
 

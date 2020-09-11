@@ -33,5 +33,5 @@ class TrainingTeardownWorkflow(object):
         :return:
         """
         sandbox.logger.info("Adding default teardown orchestration")
-        sandbox.workflow.add_to_teardown(self.default_teardown_workflow.default_teardown,None)
+        sandbox.workflow.before_teardown_started(self.default_teardown_workflow.default_teardown,None)
         sandbox.workflow.add_to_teardown(self._sandbox_terminator.teardown_student_sandboxes, None)
