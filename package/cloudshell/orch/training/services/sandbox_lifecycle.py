@@ -75,11 +75,3 @@ class SandboxLifecycleService:
             api.RemoveResourcesFromReservation(user_reservation_id, student_shared_apps)
 
         api.EndReservation(user_reservation_id)
-
-class SandboxTerminateService:
-
-    def __init__(self, sandbox: Sandbox, sandbox_output: SandboxOutputService,users_data_manager: UsersDataManagerService):
-        self._sandbox = sandbox
-        self._sandbox_output = sandbox_output
-        self._users_data_manager = users_data_manager
-
