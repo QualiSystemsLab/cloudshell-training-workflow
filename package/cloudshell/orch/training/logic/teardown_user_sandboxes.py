@@ -16,6 +16,7 @@ class SandboxTerminateLogic:
         self._sandbox_api = sandbox_api_service
         self._sandbox_lifecycle_service = sandbox_lifecycle_service
         self._users_data_manager = users_data_manager
+
         self._training_env = training_env
 
     def _delete_students_group(self):
@@ -25,6 +26,7 @@ class SandboxTerminateLogic:
         api.RemoveGroupsFromDomain(api.GetReservationDetails(self._instructor_sandbox.id).ReservationDescription.DomainName,self._instructor_sandbox.id)
 
     def teardown_student_sandboxes(self):
+        self._users_data_manager.load()
         admin_token = self._sandbox_api.login()
 
         for user in self._training_env.users_list:

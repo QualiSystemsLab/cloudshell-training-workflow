@@ -16,7 +16,9 @@ class TestTrainingTeardownWorkflow(unittest.TestCase):
 
         # act
         self.logic.default_teardown_workflow.default_teardown = Mock()
+
         self.logic._sandbox_terminator.teardown_student_sandboxes = Mock()
+
         self.logic.register(self.sandbox)
 
         # assert

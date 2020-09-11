@@ -23,7 +23,6 @@ class TrainingTeardownWorkflow(object):
         sandbox_output_service = SandboxOutputService(sandbox, env_data.debug_enabled)
         sandbox_api_service = SandboxAPIService(sandbox, self.config.sandbox_api_port, sandbox_output_service)
         users_data_manager = UsersDataManagerService(sandbox)
-        users_data_manager.load()
         sandbox_lifecycle_service = SandboxLifecycleService(sandbox,sandbox_output_service,users_data_manager)
         self._sandbox_terminator = SandboxTerminateLogic(sandbox, sandbox_output_service, sandbox_api_service, sandbox_lifecycle_service,users_data_manager, env_data)
 
