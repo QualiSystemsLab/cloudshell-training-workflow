@@ -2,16 +2,16 @@ from collections import namedtuple
 from typing import Dict, List, Tuple
 
 from cloudshell.api.cloudshell_api import AttributeNameValue, Connector, ReservationAppResource, \
-    ReservationDescriptionInfo, ServiceInstance, CloudShellAPISession, ApiEditAppRequest, SetConnectorRequest, \
+    ReservationDescriptionInfo, CloudShellAPISession, ApiEditAppRequest, SetConnectorRequest, \
     NameValuePair
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.position import Position
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
-from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
 from cloudshell.orch.training.services.ip import RequestedIPsIncrementProvider
-from cloudshell.orch.training.services.sandbox_create import SandboxCreateService
+from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
+from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 from cloudshell.orch.training.services.users import UsersService
 from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService, \
@@ -26,7 +26,7 @@ class InitializeEnvironmentLogic:
 
     def __init__(self, env_data: TrainingEnvironmentDataModel, config: TrainingWorkflowConfig,
                  users_data_manager: UsersDataManagerService, sandbox_output_service: SandboxOutputService,
-                 sandbox_components_service: SandboxComponentsHelperService, sandbox_service: SandboxCreateService,
+                 sandbox_components_service: SandboxComponentsHelperService, sandbox_service: SandboxLifecycleService,
                  users_service: UsersService, ips_increment_provider: RequestedIPsIncrementProvider):
         self._env_data = env_data
         self._config = config

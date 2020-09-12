@@ -10,7 +10,7 @@ from cloudshell.orch.training.services.sandbox_components import SandboxComponen
 from cloudshell.orch.training.services.email import EmailService
 from cloudshell.orch.training.services.ip import IPsHandlerService, RequestedIPsIncrementProvider
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
-from cloudshell.orch.training.services.sandbox_create import SandboxCreateService
+from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 from cloudshell.orch.training.services.student_links import StudentLinksProvider
 from cloudshell.orch.training.services.users import UsersService
@@ -35,7 +35,7 @@ class TrainingSetupWorkflow(object):
         # init services
         self._users_data_manager = UsersDataManagerService(self.sandbox)
         sandbox_output_service = SandboxOutputService(self.sandbox, self.env_data.debug_enabled)
-        sandbox_create_service = SandboxCreateService(self.sandbox.automation_api, sandbox_output_service)
+        sandbox_create_service = SandboxLifecycleService(self.sandbox, sandbox_output_service, self._users_data_manager)
         sandbox_api_service = SandboxAPIService(self.sandbox, self.config.sandbox_api_port, sandbox_output_service)
         email_service = EmailService(self.config.email_config, sandbox_output_service, self.sandbox.logger)
         student_links_provider = StudentLinksProvider(self.config.training_portal_base_url, self.sandbox,
