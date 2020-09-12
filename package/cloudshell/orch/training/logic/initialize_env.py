@@ -66,13 +66,13 @@ class InitializeEnvironmentLogic:
         sandbox.components.refresh_components(sandbox)
         apps = [app.app_request.app_resource for app in sandbox.components.apps.values()]
         sandbox_details = api.GetReservationDetails(sandbox.id).ReservationDescription
-
         app_connectors = self._components_service.get_apps_to_connectors_dict(apps, sandbox_details,
                                                                               sandbox.components.services)
 
+        # prepare requests for update to app connectors
         connectors_attr_updates = self._prepare_requested_vnic_attr_connector_changes(app_connectors, sandbox_details)
 
-        # duplicate apps including name and IP changes
+        # duplicate apps including name and IP changes and get updates for connector attributes
         connectors_attr_updates.extend(
             self._duplicate_apps(api, apps, app_connectors, sandbox.id))
 
