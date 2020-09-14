@@ -54,7 +54,7 @@ class UserSandboxesLogic:
     def _send_emails(self):
         for user in self._env_data.users_list:
             student_link = self._users_data.get_key(user, userDataKeys.STUDENT_LINK)
-            self._email_service.send_email([user], 'Welcome to Training', student_link)
+            self._email_service.send_email([user], 'Welcome to Training', template_parameters={'sandbox_link': student_link})
             self._sandbox_output.notify(f'Sending email to {user} with link={student_link}')
 
     def _wait_for_active_sandboxes_and_add_duplicated_resources(self, sandbox: Sandbox,
