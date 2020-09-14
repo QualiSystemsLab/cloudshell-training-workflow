@@ -5,7 +5,7 @@ from cloudshell.orch.training.parsers.sandbox_inputs_processing import SandboxIn
 from cloudshell.orch.training.logic.create_user_sandboxes import UserSandboxesLogic
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
-from cloudshell.orch.training.services.email import EmailService
+from cloudshell.orch.email_service.email import EmailService
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
 from cloudshell.orch.training.services.sandbox_create import SandboxCreateService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
