@@ -63,7 +63,10 @@ jobs:
     name: Test Coverage
     runs-on: ubuntu-latest
     steps:
-      - name: Coveralls
+      - name: Install dependencies
+        run: |
+          pip install python-coveralls
+      - name: Run coveralls
         env:
             GITHUB_TOKEN: ${{ secrets.COVERALL_TOKEN }}
         run: |
