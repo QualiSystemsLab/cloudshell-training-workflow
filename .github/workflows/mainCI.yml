@@ -52,9 +52,10 @@ jobs:
         pip install coveralls
         pip install python-coveralls
         pytest --cov=./ --cov-report=xml
-
+    - name: Unit tests
+      run: make test
     - name: Coveralls
-      uses: AndreMiras/coveralls-python-action@develop
+      uses: AndreMiras/coveralls-python-action@v20200413
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
