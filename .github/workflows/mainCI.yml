@@ -49,33 +49,11 @@ jobs:
       run: |
         pip install pytest
         pip install pytest-cov
+        pip install coveralls
+        pip install python-coveralls
         pytest --cov=./ --cov-report=xml
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path--to-lcov: coverage.xml
-
-    #- name: Upload coverage to Codecov
-    #  uses: codecov/codecov-action@v1.0.3
-    #  with:
-    #    file: ./coverage.xml
-    #    directory: ./coverage/reports/
-    #    flags: unittests
-    #    name: codecov-umbrella
-    #    fail_ci_if_error: true
-  coverage:
-    name: Test Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install dependencies
-        run: |
-          pip install wheel
-          pip install coveralls
-          pip install python-coveralls
-      - name: Run coveralls
-        env:
-            GITHUB_TOKEN: ${{ secrets.COVERALL_TOKEN }}
-        run: |
-          coveralls --output=coverage.json
-          coveralls-lcov -v -n coverage.info > coverage.json
