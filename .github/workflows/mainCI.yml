@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls
-          env:
+        env:
             GITHUB_TOKEN: ${{ secrets.COVERALL_TOKEN }}
-          run: |
+        run: |
             coveralls
