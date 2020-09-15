@@ -52,8 +52,9 @@ jobs:
         pip install coveralls
         pip install python-coveralls
         pytest --cov=./ --cov-report=xml
+
     - name: Coveralls
-      uses: coverallsapp/github-action@master
+      uses: AndreMiras/coveralls-python-action@develop
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: coverage.xml
+
