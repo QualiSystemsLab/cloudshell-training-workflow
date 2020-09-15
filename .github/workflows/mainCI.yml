@@ -46,8 +46,8 @@ jobs:
         popd
         python -m unittest
   code_coverage:
-    steps:
     runs-on: ubuntu-latest
+    steps:
     - name: Generate coverage report
       run: |
         pip install pytest
