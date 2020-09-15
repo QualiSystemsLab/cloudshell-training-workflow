@@ -45,6 +45,7 @@ jobs:
         python setup.py develop
         popd
         python -m unittest
+  code coverage:
     - name: Generate coverage report
       run: |
         pip install pytest
