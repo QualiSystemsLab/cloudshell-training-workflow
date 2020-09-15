@@ -47,6 +47,7 @@ jobs:
         python -m unittest
   code_coverage:
     steps:
+    runs-on: ubuntu-latest
     - name: Generate coverage report
       run: |
         pip install pytest
