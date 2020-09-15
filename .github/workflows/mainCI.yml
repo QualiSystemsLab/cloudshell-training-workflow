@@ -66,6 +66,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install wheel
+          pip install coveralls
           pip install python-coveralls
       - name: Run coveralls
         env:
