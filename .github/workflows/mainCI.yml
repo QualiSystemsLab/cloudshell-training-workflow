@@ -58,6 +58,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
+          pip install wheel
           pip install pytest
           pip install pytest-cov
           pip install coveralls
@@ -67,19 +68,19 @@ jobs:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALL_TOKEN }}
         run: |
           python -m coveralls
-  covdeclimate:
-    name: Code Analisys
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@master
-        with:
-          node-version: '12'
-      - run: npm install -g yarn
-      - run: yarn install
-      - run: yarn build
-      - uses: paambaati/codeclimate-action@v2.2.4
-        env:
-          CC_TEST_REPORTER_ID: 945dfb58a832d233a3caeb84e3e6d3be212e8c7abcb48117fce63b9adcb43647
-        with:
-          coverageCommand: yarn coverage
+#  covdeclimate:
+#    name: Code Analisys
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@master
+#      - uses: actions/setup-node@master
+#        with:
+#          node-version: '12'
+#      - run: npm install -g yarn
+#      - run: yarn install
+#      - run: yarn build
+#      - uses: paambaati/codeclimate-action@v2.2.4
+#        env:
+#          CC_TEST_REPORTER_ID: 945dfb58a832d233a3caeb84e3e6d3be212e8c7abcb48117fce63b9adcb43647
+#        with:
+#          coverageCommand: yarn coverage
