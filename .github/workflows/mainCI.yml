@@ -60,12 +60,14 @@ jobs:
       run: |
         pip install wheel
         pip install -U pytest pytest-cov coveralls
-        sudo gem install coveralls-lcov
+      #sudo gem install coveralls-lcov
       #pip install coveralls
       #pip install python-coveralls
     - name: Run coveralls
       env:
           GITHUB_TOKEN: ${{ secrets.COVERALL_TOKEN }}
       run: |
-        python -m coveralls --output=coverage.json
-        coveralls-lcov -v -n coverage.info > coverage.json
+      # python -m coveralls --output=coverage.json
+      # coveralls-lcov -v -n coverage.info > coverage.json
+        pytest --cov=.
+        coveralls
