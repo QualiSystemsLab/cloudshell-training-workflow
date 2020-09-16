@@ -58,7 +58,7 @@ class SandboxComponentsHelperService:
 
         return ApiEditAppRequest(app_name, new_app_name, None, None, new_default_deployment)
 
-    def get_requested_vnic_attribute_name(self, connector: Connector, app: ReservationAppResource):
+    def get_requested_vnic_attribute_name(self, connector: Connector, app: ReservationAppResource) -> str:
         if app.Name == connector.Source:
             return 'Requested Source vNIC Name'
         if app.Name == connector.Target:

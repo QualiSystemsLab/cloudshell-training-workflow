@@ -25,12 +25,7 @@ class SandboxTerminateLogic:
         self._users_service.delete_training_users_group(instructor_sandbox.id)
 
     def teardown_student_sandboxes(self, sandbox, components):
-        # should work only for instructor sandbox! If not instructor sandbox -> exit
-        if not self._training_env.instructor_mode:
-            sandbox.logger.info("Its a student sandbox, nothing to do")
-            return
-
-        # todo - move to workflow
+        # todo - move to workflow or some singleton provider?
         admin_token = self._sandbox_api.login()
 
         for user in self._training_env.users_list:
