@@ -59,7 +59,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install wheel
-        pip install -U pytest pytest-cov coveralls
+        pip install -U pytest pytest-cov coveralls coveralls-lcov
       #pip install coveralls
       #pip install python-coveralls
     - name: Run coveralls
