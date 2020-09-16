@@ -45,7 +45,7 @@ jobs:
         python setup.py develop
         popd
         python -m unittest
-    - name: Install dependencies
+    - name: coveralls
       run: |
         pip install wheel
         pip install pytest
