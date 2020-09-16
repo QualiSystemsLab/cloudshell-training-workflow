@@ -45,6 +45,18 @@ jobs:
         python setup.py develop
         popd
         python -m unittest
+    - name: Install dependencies
+      run: |
+        pip install wheel
+        pip install pytest
+        pip install pytest-cov
+        pip install coveralls
+        python -m pytest --cov=test/
+    - name: Run coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALL_TOKEN }}
+      run: |
+        python -m coveralls
     #- name: Generate coverage report
     #  run: |
     #    pip install coverage
@@ -52,22 +64,22 @@ jobs:
     #    coveralls --output=coverage.json
     #    coveralls-lcov -v -n coverage.info > coverage.json
     #    pytest --cov=test/ --cov-report=xml
-  coverage:
-    name: Test Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install dependencies
-        run: |
-          pip install wheel
-          pip install pytest
-          pip install pytest-cov
-          pip install coveralls
-          pytest --cov=test/
-      - name: Run coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALL_TOKEN }}
-        run: |
-          python -m coveralls
+#  coverage:
+#    name: Test Coverage
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Install dependencies
+#        run: |
+#          pip install wheel
+#          pip install pytest
+#          pip install pytest-cov
+#          pip install coveralls
+#          python -m pytest --cov=test/
+#      - name: Run coveralls
+#        env:
+#          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALL_TOKEN }}
+#        run: |
+#          python -m coveralls
 #  covdeclimate:
 #    name: Code Analisys
 #    runs-on: ubuntu-latest
