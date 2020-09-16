@@ -70,7 +70,7 @@ jobs:
       #pip install python-coveralls
     - name: Run coveralls
       env:
-          GITHUB_TOKEN: ${{ secrets.COVERALL_TOKEN }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALL_TOKEN }}
       run: |
         pushd package
         python setup.py develop
