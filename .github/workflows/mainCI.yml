@@ -45,13 +45,13 @@ jobs:
         python setup.py develop
         popd
         python -m unittest
-    - name: Generate coverage report
-      run: |
-        pip install coverage
-        pip install coveralls-lcov
-        coveralls --output=coverage.json
-        coveralls-lcov -v -n coverage.info > coverage.json
-        pytest --cov=test/ --cov-report=xml
+    #- name: Generate coverage report
+    #  run: |
+    #    pip install coverage
+    ##   pip install coveralls-lcov
+    #    coveralls --output=coverage.json
+    #    coveralls-lcov -v -n coverage.info > coverage.json
+    #    pytest --cov=test/ --cov-report=xml
   coverage:
     name: Test Coverage
     runs-on: ubuntu-latest
@@ -61,6 +61,7 @@ jobs:
           pip install pytest
           pip install pytest-cov
           pip install coveralls
+          pytest --cov=test/
       - name: Run coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALL_TOKEN }}
