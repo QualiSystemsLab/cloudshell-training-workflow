@@ -1,6 +1,6 @@
 from typing import Dict
 
-from cloudshell.orch.training.services.ip import RequestedIPsIncrementProvider
+from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
 
 
 class EmailConfig:
@@ -41,4 +41,4 @@ class TrainingWorkflowConfig:
         self.email_config = email_config
 
     def _validate(self):
-        RequestedIPsIncrementProvider.validate_increment_octet(self.app_duplicate_increment_octet)
+        RequestedIPsIncrementStrategy.validate_increment_octet(self.app_duplicate_increment_octet)

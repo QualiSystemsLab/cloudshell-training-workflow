@@ -2,13 +2,23 @@ import unittest
 
 from mock import Mock
 
-from cloudshell.orch.training.services.ip import IPsHandlerService
+from cloudshell.orch.training.services.ips_handler import IPsHandlerService
 
 
 class TestIPsHandlerService(unittest.TestCase):
 
     def setUp(self) -> None:
         self.ips_handler = IPsHandlerService()
+
+    def test_validate_increment_octet_raises(self):
+        with self.assertRaises(ValueError):
+            self.ips_handler.validate_increment_octet('/28')
+
+    def test_validate_increment_octet_passes_allowed_values(self):
+        # act
+        self.ips_handler.validate_increment_octet('/24')
+        self.ips_handler.validate_increment_octet('/16')
+        self.ips_handler.validate_increment_octet('/8')
 
     def test_increment_single_ip_last_octet(self):
         # act

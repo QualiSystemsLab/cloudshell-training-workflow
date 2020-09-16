@@ -8,7 +8,8 @@ from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
 from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
 from cloudshell.orch.training.services.email import EmailService
-from cloudshell.orch.training.services.ip import IPsHandlerService, RequestedIPsIncrementProvider
+from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
+from cloudshell.orch.training.services.ips_handler import IPsHandlerService
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
 from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
@@ -42,7 +43,7 @@ class TrainingSetupWorkflow(object):
                                                       sandbox_api_service)
         apps_service = SandboxComponentsHelperService(sandbox_output_service)
         users_service = UsersService(self.sandbox.automation_api, self.sandbox.logger)
-        ips_increment_service = RequestedIPsIncrementProvider(IPsHandlerService(), self.sandbox.logger)
+        ips_increment_service = RequestedIPsIncrementStrategy(IPsHandlerService(), self.sandbox.logger)
 
         # init logic
         self.user_sandbox_logic = UserSandboxesLogic(self.env_data, sandbox_output_service, self._users_data_manager,
