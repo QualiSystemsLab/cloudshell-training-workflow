@@ -64,6 +64,7 @@ jobs:
         pip install flake8
         pip install -r package/requirements.txt
         pip install -r package/test_requirements.txt
+        pip install coverage
       #sudo gem install coveralls-lcov
       #pip install coveralls
       #pip install python-coveralls
@@ -71,5 +72,6 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.COVERALL_TOKEN }}
       run: |
-        pytest --cov=.
+      #pytest --cov=.
+        coverage run -m unittest discover
         coveralls
