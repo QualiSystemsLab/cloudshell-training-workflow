@@ -67,7 +67,5 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.COVERALL_TOKEN }}
       run: |
-      #python -m coveralls --output=coverage.json
-      #coveralls-lcov -v -n coverage.info > coverage.json
         pytest --cov=.
         coveralls
