@@ -47,15 +47,17 @@ jobs:
         python -m unittest
     - name: Generate coverage report
       run: |
-        pip install pytest
-        pip install pytest-cov
-        pip install coveralls
-        pip install python-coveralls
-        pytest --cov=./ --cov-report=xml
-    - name: Unit tests
-      run: make test
-    - name: Coveralls
-      uses: AndreMiras/coveralls-python-action@v20200413
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-
+        pip install coverage
+        pytest --cov=test/ --cov-report=xml
+  coverage:
+    name: Test Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          pip install git+https://github.com/TimoRoth/coveralls-python.git
+      - name: Run coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALL_TOKEN }}
+        run: |
+          python -m coveralls
