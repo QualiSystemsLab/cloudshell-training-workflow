@@ -19,8 +19,10 @@ class TestUserSandboxesLogic(unittest.TestCase):
         self.sandbox_create_service = Mock()
         self.email_service = Mock()
         self.student_links_provider = Mock()
+        self.apps_service = Mock()
         self.logic = UserSandboxesLogic(self.env_data, self.sandbox_output_service, self.users_data_manager,
-                                        self.sandbox_create_service, self.email_service, self.student_links_provider)
+                                        self.sandbox_create_service, self.email_service, self.student_links_provider,
+                                        self.apps_service)
 
         self.sandbox = Mock()
 
@@ -101,19 +103,28 @@ class TestUserSandboxesLogic(unittest.TestCase):
         self.assertEqual(result, {'r1': Position(10, 10), 'r2': Position(20, 20)})
 
     def test_get_shared_resources(self):
+        def should_share_app(*args, **kwargs):
+            return args[0].Name in ['app1', 'app2']
+
         # arrange
-        sandbox_details = Mock()
-        sandbox_details.Resources = [Mock(AppTemplateName='t1', Name='r1'),
-                                     Mock(AppTemplateName='t2', Name='r2'),
-                                     Mock(AppTemplateName='t1', Name='r3'),
-                                     Mock(AppTemplateName='t3', Name='r4')]
-        self.env_data.shared_apps = ['t1', 't2']
+        app1 = Mock()
+        app1.app_request.app_resource = Mock(Name='app1')
+        app2 = Mock()
+        app2.app_request.app_resource = Mock(Name='app2')
+        self.sandbox.components.apps.values = Mock(return_value=[app1, Mock(), app2, Mock()])
+
+        self.apps_service.should_share_app = Mock(side_effect=should_share_app)
+
+        self.sandbox.components.resources = [Mock(Name='r1', AppDetails=Mock(AppName='app1')),
+                                             Mock(Name='r2', AppDetails=Mock(AppName='app2')),
+                                             Mock(Name='r3'),
+                                             Mock(Name='r4')]
 
         # act
-        result = self.logic._get_shared_resources(sandbox_details)
+        result = self.logic._get_shared_resources(self.sandbox)
 
         # assert
-        self.assertEqual(result, ['r1', 'r2', 'r3'])
+        self.assertEqual(['r1', 'r2'], result)
 
     def test_get_user_resources(self):
         # arrange
@@ -150,7 +161,7 @@ class TestUserSandboxesLogic(unittest.TestCase):
         self.student_links_provider.create_student_link = Mock(side_effect=[user1_link, user2_link])
 
         # act
-        self.logic._create_user_sandboxes(sandbox_details)
+        self.logic._create_user_sandboxes(self.sandbox, sandbox_details)
 
         # assert
         self.student_links_provider.create_student_link.assert_has_calls([

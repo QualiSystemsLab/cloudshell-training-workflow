@@ -45,7 +45,7 @@ class SandboxAPIService:
         authorization = f"Basic {api_token}"
         headers = {'Content-type': 'application/json', 'Authorization': authorization}
         r = self._s.delete(f'http://{self._sandbox.connectivityContextDetails.server_address}:{self._port}'
-                            f'/api/Token/{user_token}', headers=headers)
+                           f'/api/Token/{user_token}', headers=headers)
         if 400 <= r.status_code < 300:
             self._sandbox_output.debug_print("Error deleting token")
             return False
