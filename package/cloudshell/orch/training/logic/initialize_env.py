@@ -9,7 +9,7 @@ from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.position import Position
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
-from cloudshell.orch.training.services.ip import RequestedIPsIncrementProvider
+from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
 from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
 from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
@@ -27,7 +27,7 @@ class InitializeEnvironmentLogic:
     def __init__(self, env_data: TrainingEnvironmentDataModel, config: TrainingWorkflowConfig,
                  users_data_manager: UsersDataManagerService, sandbox_output_service: SandboxOutputService,
                  sandbox_components_service: SandboxComponentsHelperService, sandbox_service: SandboxLifecycleService,
-                 users_service: UsersService, ips_increment_provider: RequestedIPsIncrementProvider):
+                 users_service: UsersService, ips_increment_provider: RequestedIPsIncrementStrategy):
         self._env_data = env_data
         self._config = config
         self._users_data_manager = users_data_manager
