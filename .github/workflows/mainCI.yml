@@ -59,8 +59,9 @@ jobs:
     - name: Install dependencies
       run: |
         pip install wheel
-        pip install coveralls
-        pip install python-coveralls
+        pip install -U pytest pytest-cov coveralls
+      #pip install coveralls
+      #pip install python-coveralls
     - name: Run coveralls
       env:
           GITHUB_TOKEN: ${{ secrets.COVERALL_TOKEN }}
