@@ -60,7 +60,7 @@ jobs:
       run: |
         pip install wheel
         pip install -U pytest pytest-cov coveralls
-        gem install coveralls-lcov
+        sudo gem install coveralls-lcov
       #pip install coveralls
       #pip install python-coveralls
     - name: Run coveralls
