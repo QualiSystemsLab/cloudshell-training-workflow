@@ -1,4 +1,7 @@
-Version Info: [![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
+[![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
+[![Maintainability](https://img.shields.io/codeclimate/maintainability/QualiSystemsLab/cloudshell-training-workflow)](https://codeclimate.com/github/QualiSystemsLab/cloudshell-training-workflow)
+[![Technical Debt](https://img.shields.io/codeclimate/tech-debt/QualiSystemsLab/cloudshell-training-workflow)](https://codeclimate.com/github/QualiSystemsLab/cloudshell-training-workflow)
+[![Issues](https://img.shields.io/codeclimate/issues/QualiSystemsLab/cloudshell-training-workflow)](https://codeclimate.com/github/QualiSystemsLab/cloudshell-training-workflow)
 
 ![quali](quali.png)
 
