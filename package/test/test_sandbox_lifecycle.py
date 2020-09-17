@@ -21,7 +21,8 @@ class TestSandboxCreateService(unittest.TestCase):
         duration = Mock()
 
         # act
-        result = sandbox_create_service.create_trainee_sandbox(user, user_id, duration)
+        result = sandbox_create_service.create_trainee_sandbox(sandbox.reservationContextDetails.environment_name,
+                                                               user, user_id, duration)
 
         # assert
         self.assertEqual(result, new_reservation.Reservation)

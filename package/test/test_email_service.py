@@ -23,7 +23,7 @@ class TestEmailService(unittest.TestCase):
 
         # assert
         self.sandbox_output_service.notify.assert_called_once_with(f'{invalid_email} is not a valid email address')
-        self.email_service._send.aseert_not_called()
+        self.email_service._send.assert_not_called()
 
     def test_send_email(self):
         # arrange

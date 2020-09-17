@@ -7,6 +7,7 @@ from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
 from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 from cloudshell.orch.training.logic.teardown_user_sandboxes import SandboxTerminateLogic
+from cloudshell.orch.training.services.users import UsersService
 from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService
 
 
@@ -14,24 +15,34 @@ class TrainingTeardownWorkflow(object):
     def __init__(self, sandbox: Sandbox, config: TrainingWorkflowConfig = None):
         self.config = config if config else TrainingWorkflowConfig()
         self.default_teardown_workflow = DefaultTeardownWorkflow()
-        self._bootstrap(sandbox)
 
-    def _bootstrap(self, sandbox: Sandbox):
+        self._bootstrap(sandbox)
+        self._initialize()
+
+    def _bootstrap(self, sandbox: Sandbox) -> None:
         sandbox.logger.info("Bootstrapping teardown workflow")
 
         env_data = SandboxInputsParser.parse_sandbox_inputs(sandbox)
         sandbox_output_service = SandboxOutputService(sandbox, env_data.debug_enabled)
         sandbox_api_service = SandboxAPIService(sandbox, self.config.sandbox_api_port, sandbox_output_service)
-        users_data_manager = UsersDataManagerService(sandbox)
-        sandbox_lifecycle_service = SandboxLifecycleService(sandbox,sandbox_output_service,users_data_manager)
-        self._sandbox_terminator = SandboxTerminateLogic(sandbox, sandbox_output_service, sandbox_api_service, sandbox_lifecycle_service,users_data_manager, env_data)
+        self._users_data_manager = UsersDataManagerService(sandbox)
+        sandbox_lifecycle_service = SandboxLifecycleService(sandbox, sandbox_output_service, self._users_data_manager)
+        users_service = UsersService(sandbox.automation_api, sandbox.logger)
 
+        self._sandbox_terminator = SandboxTerminateLogic(sandbox_output_service, sandbox_api_service,
+                                                         sandbox_lifecycle_service, self._users_data_manager, env_data,
+                                                         users_service)
+
+    def _initialize(self) -> None:
+        self._users_data_manager.load()
 
     def register(self, sandbox):
         """
         :param Sandbox sandbox:
         :return:
         """
+        sandbox.logger.info("Adding teardown for user sandboxes")
+        sandbox.workflow.before_teardown_started(self._sandbox_terminator.teardown_student_sandboxes, None)
+
         sandbox.logger.info("Adding default teardown orchestration")
-        sandbox.workflow.before_teardown_started(self.default_teardown_workflow.default_teardown,None)
-        sandbox.workflow.add_to_teardown(self._sandbox_terminator.teardown_student_sandboxes, None)
+        sandbox.workflow.add_to_teardown(self.default_teardown_workflow.default_teardown, None)
