@@ -98,19 +98,27 @@ class UserSandboxesLogic:
     def _create_user_sandboxes(self, sandbox_details: ReservationDescriptionInfo):
         duration = self._calculate_user_sandbox_duration(sandbox_details)
 
+        # Adding information about Instructor
+        self._users_data.add_or_update_key(userDataKeys.INSTRUCTOR, userDataKeys.SANDBOX_ID, sandbox_details.Id)
+
         for user in self._env_data.users_list:
 
             # 1. create new trainee sandbox
             new_sandbox = self._sandbox_create_service.create_trainee_sandbox(
-                user, self._users_data.get_key(user, userDataKeys.ID), duration)
+                user, self._users_data.get_key(userDataKeys.STUDENT_LINK, userDataKeys.ID), duration)
+            #injecting the Instructor Sandbox.ID to the sandbox data of the trainee sandbox data so it can be referenced later by the student teardown logic
+            trainee_users_data_manager = UsersDataManagerService(new_sandbox)
+            trainee_users_data_manager.add_or_update_key(userDataKeys.INSTRUCTOR, userDataKeys.SANDBOX_ID, sandbox_details.Id)
+            trainee_users_data_manager.add_or_update_key(user, userDataKeys.SANDBOX_ID,new_sandbox.Id)
+            trainee_users_data_manager.save()
 
             # 2. generate student link and to sandbox data
             student_link_model = self._student_links_provider.create_student_link(user, new_sandbox.Id)
 
             # 3. save important data to sandbox data
-            self._users_data.add_or_update(user, userDataKeys.TOKEN, student_link_model.token)
-            self._users_data.add_or_update(user, userDataKeys.STUDENT_LINK, student_link_model.student_link)
-            self._users_data.add_or_update(user, userDataKeys.SANDBOX_ID, new_sandbox.Id)
+            self._users_data.add_or_update_key(user, userDataKeys.TOKEN, student_link_model.token)
+            self._users_data.add_or_update_key(user, userDataKeys.STUDENT_LINK, student_link_model.student_link)
+            self._users_data.add_or_update_key(user, userDataKeys.SANDBOX_ID, new_sandbox.Id)
 
             # 4. notify instructor about trainee link
             msg = f'<a href="{student_link_model.student_link}" style="font-size:16px">Trainee Sandbox - {user}</a>'

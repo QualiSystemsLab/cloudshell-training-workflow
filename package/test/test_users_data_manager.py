@@ -14,7 +14,7 @@ class TestUsersDataManagerService(unittest.TestCase):
         user = 'user'
 
         # act
-        users_data_manager.add_or_update(user, 'key', 'value1')
+        users_data_manager.add_or_update_key(user, 'key', 'value1')
 
         # assert
         self.assertEqual('value1', users_data_manager._data[user]['key'])
@@ -24,11 +24,11 @@ class TestUsersDataManagerService(unittest.TestCase):
         sandbox = Mock()
         users_data_manager = UsersDataManagerService(sandbox)
         user = 'user'
-        users_data_manager.add_or_update(user, 'key', 'value1')
+        users_data_manager.add_or_update_key(user, 'key', 'value1')
         self.assertEqual('value1', users_data_manager._data[user]['key'])
 
         # act
-        users_data_manager.add_or_update(user, 'key', 'value2')
+        users_data_manager.add_or_update_key(user, 'key', 'value2')
 
         # assert
         self.assertEqual('value2', users_data_manager._data[user]['key'])
@@ -38,8 +38,8 @@ class TestUsersDataManagerService(unittest.TestCase):
         sandbox = Mock()
         users_data_manager = UsersDataManagerService(sandbox)
         user = 'user'
-        users_data_manager.add_or_update(user, 'key1', 'value1')
-        users_data_manager.add_or_update(user, 'key2', 'value2')
+        users_data_manager.add_or_update_key(user, 'key1', 'value1')
+        users_data_manager.add_or_update_key(user, 'key2', 'value2')
 
         # act
         user_data = users_data_manager.get(user)
@@ -52,7 +52,7 @@ class TestUsersDataManagerService(unittest.TestCase):
         sandbox = Mock()
         users_data_manager = UsersDataManagerService(sandbox)
         user = 'user'
-        users_data_manager.add_or_update(user, 'key1', 'value1')
+        users_data_manager.add_or_update_key(user, 'key1', 'value1')
 
         # act
         value = users_data_manager.get_key(user, 'key1')
@@ -65,7 +65,7 @@ class TestUsersDataManagerService(unittest.TestCase):
         sandbox = Mock()
         users_data_manager = UsersDataManagerService(sandbox)
         user = 'user'
-        users_data_manager.add_or_update(user, 'key1', 'value1')
+        users_data_manager.add_or_update_key(user, 'key1', 'value1')
 
         # act
         value = users_data_manager.get_key(user, 'key2')

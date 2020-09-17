@@ -13,6 +13,7 @@ class UsersDataManagerServiceKeys:
     TOKEN = "token"
     STUDENT_LINK = "student_link"
     ID = "id"
+    INSTRUCTOR = "instructor"
 
 
 class UsersDataManagerService:
@@ -25,7 +26,7 @@ class UsersDataManagerService:
         self._lock = Lock()
         self._data = {}
 
-    def add_or_update(self, user: str, key: str, value: any):
+    def add_or_update_key(self, user: str, key: str, value: any):
         with self._lock:
             if user in self._data:
                 user_data = self._data.get(user)

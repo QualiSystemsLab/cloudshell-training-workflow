@@ -62,6 +62,12 @@ class SandboxLifecycleService:
         if user_reservation_status == 'Completed':
             return
 
+        user_initiated_teardown = False
+        # This means user initiated the teardown or initiated by end of class (in the case remaining duration was shorter than instructor)
+        if self._sandbox.id == user_reservation_id:
+            user_initiated_teardown = True
+
+
         instructor_resources = api.GetReservationDetails(self._sandbox.id).ReservationDescription.Resources
         instructor_deployed_apps_names = [resource.Name for resource in instructor_resources if resource.VmDetails]
 
@@ -70,8 +76,12 @@ class SandboxLifecycleService:
         user_resources = api.GetReservationDetails(user_reservation_id).ReservationDescription.Resources
         student_shared_apps = [resource.Name for resource in user_resources if
                           resource.Name in instructor_deployed_apps_names]
+
         if student_shared_apps:
             self._sandbox_output.debug_print(f"Removing resources for {user}")
+            if user_initiated_teardown:
+                for app in student_shared_apps:
+                    api.ExecuteCommand(user_reservation_id,app.Name,"App","Stop",[],True)
             api.RemoveResourcesFromReservation(user_reservation_id, student_shared_apps)
 
         api.EndReservation(user_reservation_id)
