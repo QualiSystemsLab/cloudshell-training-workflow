@@ -74,6 +74,5 @@ jobs:
         popd
         coverage run -m unittest discover
         coverage report --omit=package/test/*,package/__init__.py
-        coverage combine
         cat .coverage
         coveralls
