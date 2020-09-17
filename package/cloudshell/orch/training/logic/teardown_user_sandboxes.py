@@ -30,7 +30,7 @@ class SandboxTerminateLogic:
 
         for user in self._training_env.users_list:
             self._sandbox_output.debug_print(f'Preparing sandbox Teardown for user: {user}')
-            self._sandbox_lifecycle_service.end_student_reservation(user)
+            self._sandbox_lifecycle_service.end_student_reservation(user,self._training_env.instructor_mode)
 
             self._sandbox_output.debug_print(f'Deleting Token for user: {user}')
             self._sandbox_api.delete_token(api_token=admin_token,
