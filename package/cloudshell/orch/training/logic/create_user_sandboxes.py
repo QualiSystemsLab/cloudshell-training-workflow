@@ -130,6 +130,9 @@ class UserSandboxesLogic:
         :return: user sandbox duration in minutes
         """
         end_time = datetime.strptime(sandbox_details.EndTime, '%m/%d/%Y %H:%M')
-        duration = int((end_time - datetime.utcnow()).total_seconds() / 60)
-        return duration
+        duration_until_instructor_sandbox_ends = int((end_time - datetime.utcnow()).total_seconds() / 60)
+        # we want to add a buffer to the duration of a student sandbox to make sure that the instructor teardown
+        # will run before the student sandbox teardown. Adding buffer of 15 minutes.
+        duration_with_buffer = duration_until_instructor_sandbox_ends + 15
+        return duration_with_buffer
 
