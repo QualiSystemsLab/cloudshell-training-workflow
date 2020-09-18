@@ -72,6 +72,6 @@ jobs:
         pushd package
         python setup.py develop
         popd
-        coverage run -rcfile package/.converageac -m unittest discover
+        coverage run --rcfile package/.converageac -m unittest discover
         coverage report
         coveralls
