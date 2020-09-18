@@ -76,8 +76,9 @@ class SandboxLifecycleService:
         for app in sandbox_details.Apps:
             api.RemoveAppFromReservation(sandbox.id, appName=app.Name)
 
-    def end_student_reservation(self, user: str,instructor_mode: bool) -> None:
-        user_reservation_id = self._users_data_manager.get_key(user, userDataKeys.SANDBOX_ID) if instructor_mode else self._sandbox.id
+    def end_student_reservation(self, user: str, instructor_mode: bool) -> None:
+        user_reservation_id = self._users_data_manager.get_key(user,
+                                                               userDataKeys.SANDBOX_ID) if instructor_mode else self._sandbox.id
 
         user_reservation_status = self._api.GetReservationStatus(user_reservation_id).ReservationSlimStatus.Status
         self._sandbox_output.debug_print(f'Student reservation status is: {user_reservation_status}')
@@ -87,10 +88,10 @@ class SandboxLifecycleService:
         if user_reservation_status == 'Completed':
             return
 
-        user_resources = self._api.GetReservationDetails(user_reservation_id).ReservationDescription.Resources
-        user_deployed_apps_names = [resource.Name for resource in user_resources if resource.VmDetails]
-        apps_names_shared_with_student = [app_name for app_name in user_deployed_apps_names if
-                                    self._api.GetResourceDetails(app_name).CreatedInReservation != user_reservation_id]
+        user_reservation_details = self._api.GetReservationDetails(user_reservation_id)
+        user_resources = user_reservation_details.ReservationDescription.Resources
+        apps_names_shared_with_student = [resource.Name for resource in user_resources if
+                                          resource.VmDetails and resource.CreatedInReservation != user_reservation_id]
 
         self._sandbox_output.notify(f"Cleaning up <{user}> resources")
 
@@ -99,7 +100,7 @@ class SandboxLifecycleService:
             self._sandbox_output.debug_print(f"Removing resources for {user}")
             if not instructor_mode:
                 for app_name in apps_names_shared_with_student:
-                    self._api.ExecuteCommand(user_reservation_id,app_name,"Resource","Power Off",[],True)
+                    self._api.ExecuteCommand(user_reservation_id, app_name, "Resource", "Power Off", [], True)
             self._api.RemoveResourcesFromReservation(user_reservation_id, apps_names_shared_with_student)
 
         self._api.EndReservation(user_reservation_id)
