@@ -146,7 +146,8 @@ class TestUserSandboxesLogic(unittest.TestCase):
         result = self.logic._calculate_user_sandbox_duration(sandbox_details)
 
         # assert
-        self.assertEqual(result, 120)
+        # result should be 15 minutes longer then the diff between current time and sandbox end time for a buffer
+        self.assertEqual(result, 135)
 
     def test_create_user_sandboxes(self):
         # arrange
