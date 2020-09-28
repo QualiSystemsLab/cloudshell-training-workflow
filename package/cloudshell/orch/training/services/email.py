@@ -19,6 +19,9 @@ class EmailService:
         self._sandbox_output = sandbox_output_service
         self._logger = logger
 
+    def is_email_configured(self) -> bool:
+        return True if self._email_config else False
+
     def send_email(self, email_address: str, link: str):
         if not self._is_valid_email_address(email_address):
             self._sandbox_output.notify(f'{email_address} is not a valid email address')

@@ -38,9 +38,8 @@ class SandboxLifecycleService:
         while user_sandbox_status.ReservationSlimStatus.Status != "Started" or \
                 user_sandbox_status.ReservationSlimStatus.ProvisioningStatus != "Ready":
 
-            self._sandbox_output.notify(f"""waiting for {user}'s sandbox, 
-                                        currently {sandbox_id}'s sandbox status is {user_sandbox_status.ReservationSlimStatus.Status} 
-                                        and {user_sandbox_status.ReservationSlimStatus.ProvisioningStatus}""")
+            self._sandbox_output.notify(f"waiting for {user}'s sandbox, currently {sandbox_id}'s sandbox status is"
+                                        f" {user_sandbox_status.ReservationSlimStatus.Status} and {user_sandbox_status.ReservationSlimStatus.ProvisioningStatus}")
             sleep(interval)
             time_waited += interval
             user_sandbox_status = self._api.GetReservationStatus(sandbox_id)

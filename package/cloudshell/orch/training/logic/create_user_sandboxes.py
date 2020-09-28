@@ -55,10 +55,11 @@ class UserSandboxesLogic:
         return sandbox_details.ReservationDescription
 
     def _send_emails(self):
-        for user in self._env_data.users_list:
-            student_link = self._users_data.get_key(user, userDataKeys.STUDENT_LINK)
-            self._email_service.send_email(user, student_link)
-            self._sandbox_output.notify(f'Sending email to {user} with link={student_link}')
+        if self._email_service.is_email_configured():
+            for user in self._env_data.users_list:
+                student_link = self._users_data.get_key(user, userDataKeys.STUDENT_LINK)
+                self._email_service.send_email(user, student_link)
+                self._sandbox_output.notify(f'Sending email to {user} with link={student_link}')
 
     def _wait_for_active_sandboxes_and_add_duplicated_resources(self, sandbox: Sandbox,
                                                                 sandbox_details: ReservationDescriptionInfo):
@@ -96,7 +97,7 @@ class UserSandboxesLogic:
         apps = [app.app_request.app_resource for app in sandbox.components.apps.values()]
         apps_to_share = [app.Name for app in apps if self._apps_service.should_share_app(app)]
 
-        shared_resources = [resource.Name for resource in sandbox.components.resources if resource.AppDetails
+        shared_resources = [resource.Name for resource in sandbox.components.resources.values() if resource.AppDetails
                             and resource.AppDetails.AppName and resource.AppDetails.AppName in apps_to_share]
 
         [self._sandbox_output.debug_print(f'will add shared resource: {resource}') for resource in shared_resources]
@@ -110,7 +111,7 @@ class UserSandboxesLogic:
 
             # 1. create new trainee sandbox
             new_sandbox = self._sandbox_create_service.create_trainee_sandbox(
-                sandbox.reservationContextDetails.environment_name, user,
+                sandbox.reservationContextDetails.environment_path, user,
                 self._users_data.get_key(user, userDataKeys.ID), duration)
 
             # 2. generate student link and to sandbox data

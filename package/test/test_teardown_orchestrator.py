@@ -17,7 +17,7 @@ class TestTrainingTeardownWorkflow(unittest.TestCase):
         teardown._sandbox_terminator.teardown_student_sandboxes = Mock()
 
         # act
-        teardown.register(self.sandbox)
+        teardown.register()
 
         # assert
         self.sandbox.workflow.before_teardown_started.assert_called_with(

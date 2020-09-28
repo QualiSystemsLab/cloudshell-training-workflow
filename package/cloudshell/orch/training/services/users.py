@@ -12,18 +12,32 @@ class UsersService:
         self._api = api
         self._logger = logger
 
+    def get_training_users_group_name(self, instructor_sandbox_id: str):
+        return f'training-{instructor_sandbox_id}'
+
     def create_training_users_group(self, instructor_sandbox_id: str, domain: str):
-        self._logger.debug(f'Creating training users group {instructor_sandbox_id} in domain {domain}')
-        self._api.AddNewGroup(instructor_sandbox_id, 'Group for training users', 'Regular')
-        self._api.AddGroupsToDomain(domain, [instructor_sandbox_id])
+        group_name = self.get_training_users_group_name(instructor_sandbox_id)
+        self._logger.debug(f'Creating training users group {group_name} in domain {domain}')
+        try:
+            self._api.AddNewGroup(group_name, 'Group for training users', 'Regular')
+            self._logger.debug(f'Created user group {group_name}')
+        except CloudShellAPIError as exc:
+            if exc.code == '135':
+                self._logger.debug(f'User group {group_name} already exists')
+            else:
+                raise
+
+        self._api.AddGroupsToDomain(domain, [group_name])
 
     def delete_training_users_group(self, instructor_sandbox_id: str):
-        self._logger.debug(f'deleting training users group {instructor_sandbox_id}')
-        self._api.DeleteGroup(instructor_sandbox_id)
+        group_name = self.get_training_users_group_name(instructor_sandbox_id)
+        self._logger.debug(f'deleting training users group {group_name}')
+        self._api.DeleteGroup(group_name)
 
     def add_training_users_to_group(self, instructor_sandbox_id: str, users: List[str]):
-        self._logger.debug(f'adding users {users} to group {instructor_sandbox_id}')
-        self._api.AddUsersToGroup(users, instructor_sandbox_id)
+        group_name = self.get_training_users_group_name(instructor_sandbox_id)
+        self._logger.debug(f'adding users {users} to group {group_name}')
+        self._api.AddUsersToGroup(users, group_name)
 
     def deactivate_training_user(self, user):
         self._logger.debug(f'deactivating user {user}')
@@ -39,7 +53,7 @@ class UsersService:
                 self._api.UpdateUser(user, user, isActive=True)
 
         except CloudShellAPIError as exc:
-            if exc.code == 133:
+            if exc.code == '133':
                 #
                 self._logger.debug(f'user {user} doesnt exist, creating user')
                 new_user_pass = PasswordUtils.generate_random_password()
