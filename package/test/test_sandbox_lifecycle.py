@@ -94,7 +94,7 @@ class TestSandboxTerminateService(unittest.TestCase):
         mock_obj.ReservationSlimStatus.Status = "Completed"
         self.sandbox.automation_api.GetReservationStatus = Mock(return_value=mock_obj)
         # act
-        self.logic.end_student_reservation(Mock())
+        self.logic.end_student_reservation(Mock(),Mock())
         # assert
         self.sandbox.automation_api.EndReservation.assert_not_called()
 
@@ -111,7 +111,7 @@ class TestSandboxTerminateService(unittest.TestCase):
         instructor_reservation_details_mock.ReservationDescription.Resources = [instructor_and_student_resources_mock]
         self.sandbox.automation_api.GetReservationDetails = Mock(return_value=instructor_reservation_details_mock)
         # act
-        self.logic.end_student_reservation(Mock())
+        self.logic.end_student_reservation(Mock(),Mock())
 
         # assert
         self.sandbox.automation_api.RemoveResourcesFromReservation.assert_not_called()
@@ -131,7 +131,7 @@ class TestSandboxTerminateService(unittest.TestCase):
         self.sandbox.automation_api.GetReservationDetails = Mock(return_value=instructor_reservation_details_mock)
 
         # act
-        self.logic.end_student_reservation(Mock())
+        self.logic.end_student_reservation(Mock(),Mock())
         # assert
         self.sandbox.automation_api.RemoveResourcesFromReservation.assert_called_once()
         self.sandbox.automation_api.EndReservation.assert_called_once()

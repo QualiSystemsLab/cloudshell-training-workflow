@@ -35,7 +35,7 @@ class TestTeardownUserSandboxes(unittest.TestCase):
         self.logic.teardown_student_sandboxes(sandbox, None)
 
         # assert
-        self.logic._sandbox_lifecycle_service.end_student_reservation.assert_has_calls([call('user1'), call('user2')])
+        self.logic._sandbox_lifecycle_service.end_student_reservation.assert_has_calls([call('user1',self.logic._training_env.instructor_mode), call('user2',self.logic._training_env.instructor_mode)])
         self.logic._sandbox_api.delete_token.assert_has_calls(
             [call(api_token=self.admin_login_token, user_token=user1_token),
              call(api_token=self.admin_login_token, user_token=user2_token)])
