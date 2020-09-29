@@ -76,8 +76,8 @@ class SandboxLifecycleService:
             api.RemoveAppFromReservation(sandbox.id, appName=app.Name)
 
     def end_student_reservation(self, user: str, instructor_mode: bool) -> None:
-        user_reservation_id = self._users_data_manager.get_key(user,
-                                                               userDataKeys.SANDBOX_ID) if instructor_mode else self._sandbox.id
+        user_reservation_id = self._users_data_manager.get_key(user, userDataKeys.SANDBOX_ID) \
+            if instructor_mode else self._sandbox.id
 
         user_reservation_status = self._api.GetReservationStatus(user_reservation_id).ReservationSlimStatus.Status
         self._sandbox_output.debug_print(f'Student reservation status is: {user_reservation_status}')

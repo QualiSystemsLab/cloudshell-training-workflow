@@ -25,15 +25,29 @@ class SandboxTerminateLogic:
         self._users_service.delete_training_users_group(instructor_sandbox.id)
 
     def teardown_student_sandboxes(self, sandbox, components):
+        # in case 'teardown_student_sandboxes' fails we still want to try to run the rest of the teardown
+        self._execute_teardown_safely(sandbox)
+
+    def _execute_teardown_safely(self, sandbox: Sandbox):
+        try:
+            self._teardown_student_sandboxes_inner(sandbox)
+        except:
+            sandbox.logger.exception('Error in "teardown_student_sandboxes"')
+            sandbox.automation_api.WriteMessageToReservationOutput(
+                sandbox.id, '<font style="color:red">Error during teardown of student sandboxes. '
+                            'Please check logs for more details"</font>')
+
+    def _teardown_student_sandboxes_inner(self, sandbox: Sandbox):
         # todo - move to workflow or some singleton provider?
         admin_token = self._sandbox_api.login()
 
         for user in self._training_env.users_list:
             self._sandbox_output.debug_print(f'Preparing sandbox Teardown for user: {user}')
-            self._sandbox_lifecycle_service.end_student_reservation(user,self._training_env.instructor_mode)
+            self._sandbox_lifecycle_service.end_student_reservation(user, self._training_env.instructor_mode)
 
             self._sandbox_output.debug_print(f'Deleting Token for user: {user}')
             self._sandbox_api.delete_token(api_token=admin_token,
                                            user_token=self._users_data_manager.get_key(user, userDataKeys.TOKEN))
 
-        self._delete_students_group(sandbox)
+        if self._training_env.instructor_mode:
+            self._delete_students_group(sandbox)

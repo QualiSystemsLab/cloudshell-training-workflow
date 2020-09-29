@@ -80,6 +80,8 @@ class InitializeEnvironmentLogic:
         for att_change in connectors_attr_updates:
             api.SetConnectorAttributes(sandbox.id, att_change.Source, att_change.Target, att_change.AttributeRequests)
 
+        sandbox.components.refresh_components(sandbox)
+
     def _duplicate_apps(self, api: CloudShellAPISession, apps: List[ReservationAppResource],
                         app_connectors: Dict[str, List[Connector]], sandbox_id: str) \
             -> List[ConnectorsAttrUpdateRequest]:
