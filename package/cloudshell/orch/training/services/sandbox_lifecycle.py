@@ -1,6 +1,6 @@
 from time import sleep
 
-from cloudshell.api.cloudshell_api import UpdateTopologyGlobalInputsRequest, ReservationShortInfo, CloudShellAPISession
+from cloudshell.api.cloudshell_api import UpdateTopologyGlobalInputsRequest, ReservationShortInfo
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
@@ -68,6 +68,8 @@ class SandboxLifecycleService:
             try:
                 api.RemoveServicesFromReservation(sandbox.id, service_names)
             except Exception as ex:
+                # subnet service cannot be deleted in an active sandbox, this is why we must have this try/except for
+                # service removal
                 sandbox.logger.exception('failed to delete services')
                 self._sandbox_output.notify(f'failed to delete services with error: {ex}')
 
@@ -92,7 +94,7 @@ class SandboxLifecycleService:
         apps_names_shared_with_student = [resource.Name for resource in user_resources if
                                           resource.VmDetails and resource.CreatedInReservation != user_reservation_id]
 
-        self._sandbox_output.notify(f"Cleaning up <{user}> resources")
+        self._sandbox_output.notify(f"Cleaning up '{user}' resources")
 
         # all apps that were deployed in the instructor sandbox will be removed from the student reservation
         if apps_names_shared_with_student:
