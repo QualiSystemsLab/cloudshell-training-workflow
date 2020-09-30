@@ -1,6 +1,8 @@
 import unittest
 import random
+from typing import List
 
+from cloudshell.api.cloudshell_api import ReservationAppResource, AttributeNameValue, Connector
 from mock import Mock, call, MagicMock
 
 from cloudshell.orch.training.logic.initialize_env import InitializeEnvironmentLogic
@@ -102,5 +104,29 @@ class TestInitializeEnvironmentLogic(unittest.TestCase):
         # assert
         self.assertEqual(result, (user_index + 1) * 10)
 
+    def test_create_duplicate_app_connectors_requests(self):
+        # arrange
+        mock_app: ReservationAppResource = Mock()
+        mock_connector1: Connector = Mock()
+        mock_connector1.Source = mock_app.Name
+        mock_attr_name = Mock()
+        mock_attr_val = Mock()
+        mock_attribute = AttributeNameValue(mock_attr_name, mock_attr_val)
+        mock_connector1.Attributes = [mock_attribute]
+
+        mock_connector2: Connector = Mock()
+        mock_connector2.Target = mock_app.Name
+        mock_connector2.Attributes = []
+
+        mock_app_connectors: List[Connector] = [mock_connector1, mock_connector2]
+
+        # act
+        returned_set_connector_requests, returned_connectors_attr_updates = self.init_env_logic._create_duplicate_app_connectors_requests(
+            mock_app, mock_app_connectors, Mock())
+
+        # assert
+        # Checking that connector 2 without attributes was not added
+        self.assertEqual(len(returned_set_connector_requests), 2)
+        self.assertEqual(len(returned_connectors_attr_updates), 1)
 
 
