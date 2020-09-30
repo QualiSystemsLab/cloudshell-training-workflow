@@ -1,8 +1,8 @@
 import unittest
 import random
-from typing import List
+from typing import List, Dict
 
-from cloudshell.api.cloudshell_api import ReservationAppResource, AttributeNameValue, Connector
+from cloudshell.api.cloudshell_api import ReservationAppResource, AttributeNameValue, Connector, CloudShellAPISession
 from mock import Mock, call, MagicMock
 
 from cloudshell.orch.training.logic.initialize_env import InitializeEnvironmentLogic
@@ -129,4 +129,25 @@ class TestInitializeEnvironmentLogic(unittest.TestCase):
         self.assertEqual(len(returned_set_connector_requests), 2)
         self.assertEqual(len(returned_connectors_attr_updates), 1)
 
+    def test_duplicate_apps(self):
+        # arrange
+        mock_api: CloudShellAPISession = Mock()
+        mock_app:ReservationAppResource = Mock()
+        mock_app.Name = "mock_app_name"
+        mock_apps:List[ReservationAppResource] = [mock_app]
+        mock_app_connectors:Dict[str, List[Connector]] = MagicMock()
+        mock_sandbox_id: str = Mock()
+        self.init_env_logic._components_service.get_apps_to_duplicate = Mock(return_value=mock_apps)
+        service_app_positions_dict = MagicMock()
+        mock_service_app_positions = Mock()
+        service_app_positions_dict.__getitem__  = MagicMock(return_value = mock_service_app_positions)
+        self.init_env_logic._components_service.get_service_and_app_name_to_position_dict = MagicMock(return_value=service_app_positions_dict)
+        self.init_env_logic._env_data.users_list = [Mock()]
+        self.init_env_logic._duplicate_app_and_get_update_request = Mock()
+
+        # act
+        self.init_env_logic._duplicate_apps(mock_api,mock_apps,mock_app_connectors,mock_sandbox_id)
+
+        # assert
+        self.init_env_logic._duplicate_app_and_get_update_request.assert_called_once_with(mock_api,"1_mock_app_name",mock_app,mock_sandbox_id,mock_service_app_positions,0)
 
