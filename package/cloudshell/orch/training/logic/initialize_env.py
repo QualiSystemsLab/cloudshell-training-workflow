@@ -80,6 +80,8 @@ class InitializeEnvironmentLogic:
         for att_change in connectors_attr_updates:
             api.SetConnectorAttributes(sandbox.id, att_change.Source, att_change.Target, att_change.AttributeRequests)
 
+        sandbox.components.refresh_components(sandbox)
+
     def _duplicate_apps(self, api: CloudShellAPISession, apps: List[ReservationAppResource],
                         app_connectors: Dict[str, List[Connector]], sandbox_id: str) \
             -> List[ConnectorsAttrUpdateRequest]:
@@ -123,7 +125,7 @@ class InitializeEnvironmentLogic:
     # todo move to components service?
     def _create_duplicate_app_connectors_requests(self, app: ReservationAppResource, app_connectors: List[Connector],
                                                   new_app_name: str) -> Tuple[List[SetConnectorRequest],
-                                                              List[ConnectorsAttrUpdateRequest]]:
+                                                                              List[ConnectorsAttrUpdateRequest]]:
         # Copy all attribute values for connectors including vnic requests set before
         set_connector_requests = []
         connectors_attr_updates = []
@@ -144,7 +146,7 @@ class InitializeEnvironmentLogic:
             connector_request = SetConnectorRequest(source, target, 'bi', '')
             set_connector_requests.append(connector_request)
             if atts_with_values:
-                connectors_attr_updates.append((source, target, atts_with_values))
+                connectors_attr_updates.append(ConnectorsAttrUpdateRequest(source, target, atts_with_values))
 
         return set_connector_requests, connectors_attr_updates
 
