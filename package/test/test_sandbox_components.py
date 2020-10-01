@@ -1,5 +1,7 @@
 import unittest
+from typing import List, Dict
 
+from cloudshell.api.cloudshell_api import Connector, ReservationAppResource, ReservationDescriptionInfo, ServiceInstance
 from mock import Mock
 
 from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
@@ -145,3 +147,90 @@ class TestSandboxComponentsHelperService(unittest.TestCase):
         connector = Mock(Source='app1', Target='subnet')
         result = self.sandbox_comp_helper.get_management_connector([connector])
         self.assertIsNone(result)
+
+    def test_get_requested_vnic_attribute_name_src(self):
+        # arrange
+        mock_connector: Connector = Mock()
+        mock_app: ReservationAppResource = Mock()
+        mock_app.Name = "app_name"
+        mock_connector.Source =  "app_name"
+
+        # act
+        result = self.sandbox_comp_helper.get_requested_vnic_attribute_name(mock_connector,mock_app)
+
+        # assert
+        self.assertEqual(result,"Requested Source vNIC Name")
+
+    def test_get_requested_vnic_attribute_name_trgt(self):
+        # arrange
+        mock_connector: Connector = Mock()
+        mock_app: ReservationAppResource = Mock()
+        mock_app.Name = "app_name"
+        mock_connector.Target =  "app_name"
+
+        # act
+        result = self.sandbox_comp_helper.get_requested_vnic_attribute_name(mock_connector,mock_app)
+
+        # assert
+        self.assertEqual(result,"Requested Target vNIC Name")
+
+    def test_get_requested_vnic_attribute_name_none(self):
+        # arrange
+        mock_connector: Connector = Mock()
+        mock_app: ReservationAppResource = Mock()
+        mock_app.Name = "app_name"
+
+        # act
+        result = self.sandbox_comp_helper.get_requested_vnic_attribute_name(mock_connector,mock_app)
+
+        # assert
+        self.assertEqual(result,None)
+
+    def test_get_requested_vnic_attribute_name(self):
+        # arrange
+        mock_connector: Connector = Mock()
+        mock_app: ReservationAppResource = Mock()
+        mock_app.Name = "app_name"
+        mock_connector.Source =  "app_name"
+        mock_connector_attribute = Mock()
+        mock_connector_attribute.Name = 'Requested Source vNIC Name'
+        mock_connector.Attributes = [mock_connector_attribute]
+
+        # act
+        result = self.sandbox_comp_helper.get_requested_vnic_attribute(mock_connector,mock_app)
+
+        # assert
+        self.assertEqual(result,mock_connector_attribute)
+
+    def test_get_requested_vnic_attribute_name_none(self):
+        # arrange
+        mock_connector: Connector = Mock()
+        mock_app: ReservationAppResource = Mock()
+        mock_app.Name = "app_name"
+        mock_connector.Source =  "app_name"
+        mock_connector.Attributes = [Mock()]
+
+        # act
+        result = self.sandbox_comp_helper.get_requested_vnic_attribute(mock_connector,mock_app)
+
+        # assert
+        self.assertEqual(result,None)
+
+    def test_get_apps_to_connectors_dict(self):
+        # arrange
+        mock_app: ReservationAppResource = Mock()
+        mock_app.Name = "app_name"
+        mock_apps:List[ReservationAppResource] = [mock_app]
+        mock_connector: Connector = Mock()
+        mock_connector.Source = "app_name"
+
+        mock_sandbox_details:ReservationDescriptionInfo = Mock()
+        mock_sandbox_details.Connectors = [mock_connector]
+
+        mock_services_dict:Dict[str, ServiceInstance] = {mock_connector.Target: Mock()}
+
+        # act
+        result = self.sandbox_comp_helper.get_apps_to_connectors_dict(mock_apps,mock_sandbox_details,mock_services_dict)
+
+        # assert
+        self.assertEqual(result, {"app_name":[mock_connector]})
