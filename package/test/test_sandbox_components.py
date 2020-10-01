@@ -1,10 +1,12 @@
 import unittest
 from typing import List, Dict
 
-from cloudshell.api.cloudshell_api import Connector, ReservationAppResource, ReservationDescriptionInfo, ServiceInstance
+from cloudshell.api.cloudshell_api import Connector, ReservationAppResource, ReservationDescriptionInfo, \
+    ServiceInstance, CloudShellAPISession, ResourceDiagramLayoutInfo, ReservationDiagramLayoutResponseInfo
 from mock import Mock
 
 from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
+from cloudshell.orch.training.models.position import Position
 
 
 class TestSandboxComponentsHelperService(unittest.TestCase):
@@ -234,3 +236,25 @@ class TestSandboxComponentsHelperService(unittest.TestCase):
 
         # assert
         self.assertEqual(result, {"app_name":[mock_connector]})
+
+    def test_get_service_and_app_name_to_position_dict(self):
+        # arrange
+        mock_api: CloudShellAPISession = Mock()
+        mock_sandbox_id = Mock()
+        mock_service_position:ResourceDiagramLayoutInfo = Mock()
+        mock_resource_name = Mock()
+        mock_service_position.ResourceName = mock_resource_name
+        mock_x = Mock()
+        mock_y = Mock()
+        mock_service_position.X = mock_x
+        mock_service_position.Y = mock_y
+
+        mock_reservation_services_positions:ReservationDiagramLayoutResponseInfo = Mock()
+        mock_reservation_services_positions.ResourceDiagramLayouts = [mock_service_position]
+        mock_api.GetReservationServicesPositions = Mock(return_value=mock_reservation_services_positions)
+
+        # act
+        result = self.sandbox_comp_helper.get_service_and_app_name_to_position_dict(mock_api,mock_sandbox_id)
+
+        # assert
+        self.assertEqual(result, {mock_resource_name: Position(mock_x,mock_y)})

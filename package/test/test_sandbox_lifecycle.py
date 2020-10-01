@@ -1,5 +1,8 @@
 import unittest
 
+from cloudshell.api.cloudshell_api import CloudShellAPISession, GetReservationDescriptionResponseInfo, \
+    ReservedResourceInfo, ServiceInstance, ReservationAppResource
+from cloudshell.workflow.orchestration.sandbox import Sandbox
 from mock import Mock, patch
 
 from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
@@ -135,3 +138,31 @@ class TestSandboxTerminateService(unittest.TestCase):
         # assert
         self.sandbox.automation_api.RemoveResourcesFromReservation.assert_called_once()
         self.sandbox.automation_api.EndReservation.assert_called_once()
+
+    def test_clear_sandbox_components(self):
+        # arrange
+        mock_sandbox: Sandbox = Mock()
+        mock_sandbox.id = "sandbox_id"
+        mock_api: CloudShellAPISession = Mock()
+        mock_sandbox.automation_api = mock_api
+        mock_get_reservation_details:GetReservationDescriptionResponseInfo = Mock()
+        mock_reservation_description = Mock()
+        mock_resource:ReservedResourceInfo = Mock()
+        mock_resource.Name = "mock_resource_name"
+        mock_service:ServiceInstance = Mock()
+        mock_service.Alias = "mock_alias"
+        mock_app:ReservationAppResource = Mock()
+        mock_app.Name = "mock_app_name"
+        mock_reservation_description.Resources = [mock_resource]
+        mock_reservation_description.Services = [mock_service]
+        mock_reservation_description.Apps = [mock_app]
+        mock_get_reservation_details.ReservationDescription = mock_reservation_description
+        mock_api.GetReservationDetails = Mock(return_value=mock_get_reservation_details)
+
+        # act
+        self.logic.clear_sandbox_components(mock_sandbox)
+
+        # assert
+        mock_sandbox.automation_api.RemoveResourcesFromReservation.assert_called_once_with(mock_sandbox.id,[mock_resource.Name])
+        mock_sandbox.automation_api.RemoveServicesFromReservation.assert_called_once_with(mock_sandbox.id,[mock_service.Alias])
+        mock_sandbox.automation_api.RemoveAppFromReservation.assert_called_once_with(mock_sandbox.id,appName=mock_app.Name)
