@@ -219,17 +219,15 @@ class InitializeEnvironmentLogic:
             # if we detected a management connector and Requested vNIC was not set on any connector then we set
             # the management connector with index 0 and explicitly assign consecutive index values to all other
             # connectors for current app
-            if mgmt_connector and not has_existing_vnic_req:
-                self._sandbox_output.debug_print(f'Setting management connection for {app.Name}')
-                connectors_attr_updates.append(
-                    self._prepare_connector_change_req(app, mgmt_connector, '0'))
+            self._sandbox_output.debug_print(f'Setting management connection for {app.Name}')
+            connectors_attr_updates.append(
+                self._prepare_connector_change_req(app, mgmt_connector, '0'))
 
-                for index, connector in enumerate(connectors):
-                    if connector == mgmt_connector:
-                        continue
-                    vnic_index = index + 1
-                    connectors_attr_updates.append(
-                        self._prepare_connector_change_req(app, connector, str(vnic_index)))
+            for index, connector in enumerate(connectors):
+                if connector == mgmt_connector:
+                    continue
+                vnic_index = index + 1
+                connectors_attr_updates.append(self._prepare_connector_change_req(app, connector, str(vnic_index)))
 
         return connectors_attr_updates
 
