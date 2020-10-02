@@ -65,7 +65,7 @@ class SandboxComponentsHelperService:
             return 'Requested Target vNIC Name'
         return None
 
-    def get_requested_vnic_attribute(self, connector, app):
+    def get_requested_vnic_attribute(self, connector: Connector, app: ReservationAppResource):
         attr_name = self.get_requested_vnic_attribute_name(connector, app)
         for attr in connector.Attributes:
             if attr.Name == attr_name:
