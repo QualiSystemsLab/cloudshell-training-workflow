@@ -15,8 +15,9 @@ class TrainingTeardownWorkflow(object):
     def __init__(self, sandbox: Sandbox, config: TrainingWorkflowConfig = None):
         self.config = config if config else TrainingWorkflowConfig()
         self.default_teardown_workflow = DefaultTeardownWorkflow()
+        self._sandbox = sandbox
 
-        self._bootstrap(sandbox)
+        self._bootstrap(self._sandbox)
         self._initialize()
 
     def _bootstrap(self, sandbox: Sandbox) -> None:
@@ -36,13 +37,9 @@ class TrainingTeardownWorkflow(object):
     def _initialize(self) -> None:
         self._users_data_manager.load()
 
-    def register(self, sandbox):
-        """
-        :param Sandbox sandbox:
-        :return:
-        """
-        sandbox.logger.info("Adding teardown for user sandboxes")
-        sandbox.workflow.before_teardown_started(self._sandbox_terminator.teardown_student_sandboxes, None)
+    def register(self) -> None:
+        self._sandbox.logger.info("Adding teardown for user sandboxes")
+        self._sandbox.workflow.before_teardown_started(self._sandbox_terminator.teardown_student_sandboxes, None)
 
-        sandbox.logger.info("Adding default teardown orchestration")
-        sandbox.workflow.add_to_teardown(self.default_teardown_workflow.default_teardown, None)
+        self._sandbox.logger.info("Adding default teardown orchestration")
+        self._sandbox.workflow.add_to_teardown(self.default_teardown_workflow.default_teardown, None)

@@ -115,10 +115,10 @@ class TestUserSandboxesLogic(unittest.TestCase):
 
         self.apps_service.should_share_app = Mock(side_effect=should_share_app)
 
-        self.sandbox.components.resources = [Mock(Name='r1', AppDetails=Mock(AppName='app1')),
-                                             Mock(Name='r2', AppDetails=Mock(AppName='app2')),
-                                             Mock(Name='r3'),
-                                             Mock(Name='r4')]
+        self.sandbox.components.resources.values = Mock(return_value=[Mock(Name='r1', AppDetails=Mock(AppName='app1')),
+                                                                      Mock(Name='r2', AppDetails=Mock(AppName='app2')),
+                                                                      Mock(Name='r3'),
+                                                                      Mock(Name='r4')])
 
         # act
         result = self.logic._get_shared_resources(self.sandbox)
@@ -152,7 +152,8 @@ class TestUserSandboxesLogic(unittest.TestCase):
     def test_create_user_sandboxes(self):
         # arrange
         sandbox_details = Mock()
-        self.logic._calculate_user_sandbox_duration = Mock()
+        duration = Mock()
+        self.logic._calculate_user_sandbox_duration = Mock(return_value=duration)
         self.env_data.users_list = ['user1', 'user2']
         user1_sandbox = Mock()
         user2_sandbox = Mock()
@@ -177,6 +178,10 @@ class TestUserSandboxesLogic(unittest.TestCase):
             call('user2', userDataKeys.TOKEN, user2_link.token),
             call('user2', userDataKeys.STUDENT_LINK, user2_link.student_link)
         ], any_order=True)
+        self.sandbox_create_service.create_trainee_sandbox.assert_has_calls([
+            call(self.sandbox.reservationContextDetails.environment_path, 'user1', ANY, duration),
+            call(self.sandbox.reservationContextDetails.environment_path, 'user2', ANY, duration)
+        ])
 
     def test_send_emails(self):
         # arrange

@@ -48,7 +48,7 @@ class UsersDataManagerService:
             data_kvp = self._sandbox.automation_api.GetSandboxData(self._sandbox.id).SandboxDataKeyValues
             if data_kvp:
                 users_data = next(iter(filter(lambda x: x.Key == USERS_DICT_KEY, data_kvp)), None)
-                self._data = users_data.Value if users_data else {}
+                self._data = json.loads(users_data.Value) if users_data else {}
             else:
                 self._data = {}
 
