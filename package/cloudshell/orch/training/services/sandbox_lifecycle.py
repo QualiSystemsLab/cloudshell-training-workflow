@@ -1,6 +1,6 @@
 from time import sleep
 
-from cloudshell.api.cloudshell_api import UpdateTopologyGlobalInputsRequest, ReservationShortInfo, CloudShellAPISession
+from cloudshell.api.cloudshell_api import UpdateTopologyGlobalInputsRequest, ReservationShortInfo
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
@@ -38,9 +38,8 @@ class SandboxLifecycleService:
         while user_sandbox_status.ReservationSlimStatus.Status != "Started" or \
                 user_sandbox_status.ReservationSlimStatus.ProvisioningStatus != "Ready":
 
-            self._sandbox_output.notify(f"""waiting for {user}'s sandbox, 
-                                        currently {sandbox_id}'s sandbox status is {user_sandbox_status.ReservationSlimStatus.Status} 
-                                        and {user_sandbox_status.ReservationSlimStatus.ProvisioningStatus}""")
+            self._sandbox_output.notify(f"waiting for {user}'s sandbox, currently {sandbox_id}'s sandbox status is"
+                                        f" {user_sandbox_status.ReservationSlimStatus.Status} and {user_sandbox_status.ReservationSlimStatus.ProvisioningStatus}")
             sleep(interval)
             time_waited += interval
             user_sandbox_status = self._api.GetReservationStatus(sandbox_id)
@@ -69,6 +68,8 @@ class SandboxLifecycleService:
             try:
                 api.RemoveServicesFromReservation(sandbox.id, service_names)
             except Exception as ex:
+                # subnet service cannot be deleted in an active sandbox, this is why we must have this try/except for
+                # service removal
                 sandbox.logger.exception('failed to delete services')
                 self._sandbox_output.notify(f'failed to delete services with error: {ex}')
 
@@ -77,8 +78,8 @@ class SandboxLifecycleService:
             api.RemoveAppFromReservation(sandbox.id, appName=app.Name)
 
     def end_student_reservation(self, user: str, instructor_mode: bool) -> None:
-        user_reservation_id = self._users_data_manager.get_key(user,
-                                                               userDataKeys.SANDBOX_ID) if instructor_mode else self._sandbox.id
+        user_reservation_id = self._users_data_manager.get_key(user, userDataKeys.SANDBOX_ID) \
+            if instructor_mode else self._sandbox.id
 
         user_reservation_status = self._api.GetReservationStatus(user_reservation_id).ReservationSlimStatus.Status
         self._sandbox_output.debug_print(f'Student reservation status is: {user_reservation_status}')
@@ -93,7 +94,7 @@ class SandboxLifecycleService:
         apps_names_shared_with_student = [resource.Name for resource in user_resources if
                                           resource.VmDetails and resource.CreatedInReservation != user_reservation_id]
 
-        self._sandbox_output.notify(f"Cleaning up <{user}> resources")
+        self._sandbox_output.notify(f"Cleaning up '{user}' resources")
 
         # all apps that were deployed in the instructor sandbox will be removed from the student reservation
         if apps_names_shared_with_student:

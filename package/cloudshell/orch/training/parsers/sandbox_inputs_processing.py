@@ -1,13 +1,10 @@
+from typing import List
+
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
-class SandboxInputsParser:
 
-    @staticmethod
-    def _is_debug_on(sandbox):
-        if 'Diagnostics' in sandbox.global_inputs:
-            return sandbox.global_inputs['Diagnostics'] == 'On'
-        return False
+class SandboxInputsParser:
 
     @staticmethod
     def parse_sandbox_inputs(sandbox: Sandbox) -> TrainingEnvironmentDataModel:
@@ -18,15 +15,31 @@ class SandboxInputsParser:
         return env_data
 
     @staticmethod
-    def _sandbox_user_list(sandbox):
-        training_users_list = []
+    def _is_debug_on(sandbox):
+        if 'Diagnostics' in sandbox.global_inputs:
+            return sandbox.global_inputs['Diagnostics'] == 'On'
+        return False
+
+    @staticmethod
+    def _sandbox_user_list(sandbox) -> List[str]:
+        users_list = SandboxInputsParser._split_training_users_input(sandbox)
+        if users_list and len(users_list) == 1 and '#' in users_list[0]:
+            # for now we remove the user ID after the hash tag, in the future we might need to parse it into its own
+            #  variable in case it will be needed
+            hashtag_index = users_list[0].index('#')
+            users_list[0] = users_list[0][:hashtag_index]
+        if users_list and len(users_list) == 1 and not users_list[0]:
+            return []
+        return users_list
+
+    @staticmethod
+    def _split_training_users_input(sandbox) -> List[str]:
         if "Training Users" in sandbox.global_inputs:
-            users_list = sandbox.global_inputs.get("Training Users", "").split(";")
-            if len(users_list) > 1:
-                training_users_list = users_list
-        return training_users_list
+            return sandbox.global_inputs.get('Training Users', '').split(";")
+        return []
 
     @staticmethod
     def _is_instructor_mode(sandbox):
-        #if "#" in user list than this would be student_mode meaning instructor_mode=False
-        return not (SandboxInputsParser._sandbox_user_list(sandbox) and "#" in SandboxInputsParser._sandbox_user_list(sandbox)[0])
+        # if "#" in user list than this would be student_mode meaning instructor_mode=False
+        user_list = SandboxInputsParser._split_training_users_input(sandbox)
+        return not (user_list and '#' in user_list[0])

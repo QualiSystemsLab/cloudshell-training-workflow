@@ -77,7 +77,7 @@ class TestUsersDataManagerService(unittest.TestCase):
         # arrange
         sandbox = Mock()
         sandbox.automation_api = Mock()
-        sandbox_data_kvp = [Mock(Key=USERS_DICT_KEY, Value={'user': {'key1', 'value1'}}),
+        sandbox_data_kvp = [Mock(Key=USERS_DICT_KEY, Value='{"user": {"key1": "value1"}}'),
                             Mock(Key='some_key', Value='some_value')]
         get_sandbox_data_return_val = Mock(SandboxDataKeyValues=sandbox_data_kvp)
         sandbox.automation_api.GetSandboxData = Mock(return_value=get_sandbox_data_return_val)
@@ -87,7 +87,7 @@ class TestUsersDataManagerService(unittest.TestCase):
         users_data_manager.load()
 
         # assert
-        self.assertTrue(users_data_manager._data == {'user': {'key1', 'value1'}})
+        self.assertTrue(users_data_manager._data == {'user': {'key1': 'value1'}})
 
     def test_load_no_sandboxdata_from_server(self):
         # arrange
