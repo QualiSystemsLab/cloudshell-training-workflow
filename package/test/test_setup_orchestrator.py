@@ -54,7 +54,7 @@ class TestTrainingSetupWorkflow(unittest.TestCase):
         # assert
         self.setup.init_logic.prepare_environment.assert_called_once()
         self.setup._users_data_manager.load.assert_called_once()
-        self.setup._users_data_manager.load.assert_not_called()
+        self.setup.init_logic.prepare_environment.assert_called_once()
 
     def test_do_on_configuration_ended(self):
         # arrange

@@ -198,21 +198,25 @@ class TestInitializeEnvironmentLogic(unittest.TestCase):
 
     def test_prepare_requested_vnic_attr_connector_changes(self):
         # arrange
-        mock_connector: Connector = Mock()
+
+        mock_mgmt_connector: Connector = Mock()
         mock_app_to_connectors_dict: Dict[str, List[Connector]] = MagicMock()
-        mock_app_to_connectors_dict.__getitem__ = MagicMock(return_value=[mock_connector])
+        mock_app_to_connectors_dict.__getitem__ = MagicMock(return_value=[mock_mgmt_connector])
 
         mock_sandbox_details: ReservationDescriptionInfo = Mock
         mock_app: ReservationAppResource = Mock()
         mock_sandbox_details.Apps = [mock_app]
         self.init_env_logic._does_app_has_multiple_connectors = Mock(return_value=True)
         self.init_env_logic._components_service.does_connector_has_existing_vnic_req = Mock(return_value=False)
+        self.init_env_logic._components_service.get_management_connector = Mock(return_value=mock_mgmt_connector)
+        self.init_env_logic._prepare_connector_change_req = Mock()
 
         # act
         self.init_env_logic._prepare_requested_vnic_attr_connector_changes(mock_app_to_connectors_dict,mock_sandbox_details)
 
         # assert
-        self.init_env_logic._prepare_connector_change_req.assert_called_once()
+        self.init_env_logic._prepare_connector_change_req.assert_called_once_with(mock_app,mock_mgmt_connector,"0")
+
 
     def test_duplicate_app_and_get_update_request(self):
         # arrange
