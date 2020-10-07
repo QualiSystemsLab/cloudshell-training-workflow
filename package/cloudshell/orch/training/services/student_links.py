@@ -1,3 +1,4 @@
+from cloudshell.api.common_cloudshell_api import CloudShellAPIError
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
 from cloudshell.orch.training.models.student_link import StudentLinkModel
@@ -12,6 +13,7 @@ class StudentLinksProvider:
         self._sandbox_api = sandbox_api_service
 
     def create_student_link(self, user: str, sandbox_id: str) -> StudentLinkModel:
+        self._sandbox.logger.info(f"Creating trainee token for {user}")
         token = self._create_token(user, self._sandbox.reservationContextDetails.domain)
         student_link = self._format_student_link(sandbox_id, token)
         return StudentLinkModel(token, student_link)
@@ -21,4 +23,9 @@ class StudentLinksProvider:
 
     def _create_token(self, user: str, domain: str) -> str:
         admin_token = self._sandbox_api.login()
-        return self._sandbox_api.create_token(admin_token, user, domain)
+        try:
+            created_token = self._sandbox_api.create_token(admin_token, user, domain)
+        except CloudShellAPIError as exc:
+            self._sandbox.logger.exception(f"Creating trainee token for {user} failed - exception occurred")
+            raise exc
+        return created_token

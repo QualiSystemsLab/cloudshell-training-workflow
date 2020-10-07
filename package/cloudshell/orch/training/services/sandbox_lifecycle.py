@@ -1,6 +1,7 @@
 from time import sleep
 
 from cloudshell.api.cloudshell_api import UpdateTopologyGlobalInputsRequest, ReservationShortInfo
+from cloudshell.api.common_cloudshell_api import CloudShellAPIError
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
@@ -19,14 +20,20 @@ class SandboxLifecycleService:
 
     def create_trainee_sandbox(self, blueprint_name: str, user: str, user_id: str,
                                duration: int) -> ReservationShortInfo:
-        new_sandbox = self._api.CreateImmediateTopologyReservation(
-            f"{user} - Trainee Sandbox",
-            user, duration, False, False, 10,
-            topologyFullPath=blueprint_name,
-            globalInputs=[
-                UpdateTopologyGlobalInputsRequest(
-                    "Training Users",
-                    f"{user}#{user_id}")])
+
+        self._sandbox.logger.info(f"Creating trainee sandbox for {user}")
+        try:
+            new_sandbox = self._api.CreateImmediateTopologyReservation(
+                f"{user} - Trainee Sandbox",
+                user, duration, False, False, 10,
+                topologyFullPath=blueprint_name,
+                globalInputs=[
+                    UpdateTopologyGlobalInputsRequest(
+                        "Training Users",
+                        f"{user}#{user_id}")])
+        except CloudShellAPIError as exc:
+            self._sandbox.logger.exception(f"Creating trainee sandbox for {user} failed - exception occurred")
+            raise
 
         return new_sandbox.Reservation
 
