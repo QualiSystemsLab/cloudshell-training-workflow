@@ -1,3 +1,4 @@
 urllib3==1.25.8
 cloudshell-orch-core>=3.3.0.0,<3.4.0.0
+cloudshell-email
 requests==2.24.0
