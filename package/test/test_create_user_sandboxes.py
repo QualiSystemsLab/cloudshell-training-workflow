@@ -194,5 +194,6 @@ class TestUserSandboxesLogic(unittest.TestCase):
         self.logic._send_emails()
 
         # assert
-        self.email_service.send_email.assert_has_calls([call('user1', user1_link), call('user2', user2_link)])
+        self.email_service.send_email.assert_has_calls([call(['user1'], 'Welcome to Training', template_parameters={'sandbox_link': user1_link}),
+                                                        call(['user2'], 'Welcome to Training', template_parameters={'sandbox_link': user2_link})])
         self.assertEqual(self.email_service.send_email.call_count, 2)
