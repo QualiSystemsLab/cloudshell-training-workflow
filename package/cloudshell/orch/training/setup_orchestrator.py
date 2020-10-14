@@ -38,7 +38,7 @@ class TrainingSetupWorkflow(object):
         sandbox_output_service = SandboxOutputService(self.sandbox, self.env_data.debug_enabled)
         sandbox_create_service = SandboxLifecycleService(self.sandbox, sandbox_output_service, self._users_data_manager)
         sandbox_api_service = SandboxAPIService(self.sandbox, self.config.sandbox_api_port, sandbox_output_service)
-        email_service = EmailService(self.config.email_config, sandbox_output_service, self.sandbox.logger)
+        email_service = EmailService(self.config.email_config, self.sandbox.logger)
         student_links_provider = StudentLinksProvider(self.config.training_portal_base_url, self.sandbox,
                                                       sandbox_api_service)
         apps_service = SandboxComponentsHelperService(sandbox_output_service)
