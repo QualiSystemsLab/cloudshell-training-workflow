@@ -39,7 +39,6 @@ class SandboxTerminateLogic:
 
     def _teardown_student_sandboxes_inner(self, sandbox: Sandbox):
         sandbox.logger.info("Starting tearing down process")
-        # todo - move to workflow or some singleton provider?
         admin_token = self._sandbox_api.login()
 
         for user in self._training_env.users_list:

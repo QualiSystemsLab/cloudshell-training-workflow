@@ -124,7 +124,6 @@ class InitializeEnvironmentLogic:
 
         return connectors_attr_updates
 
-    # todo move to components service?
     def _create_duplicate_app_connectors_requests(self, app: ReservationAppResource, app_connectors: List[Connector],
                                                   new_app_name: str) -> Tuple[List[SetConnectorRequest],
                                                                               List[ConnectorsAttrUpdateRequest]]:
@@ -156,17 +155,25 @@ class InitializeEnvironmentLogic:
                                               app: ReservationAppResource, sandbox_id: str, app_pos: Position,
                                               user_index: int) -> ApiEditAppRequest:
         # add duplicate app in new position
+        default_deployment_option = self._components_service.get_default_deployment_option(app)
         new_app_pos = self._calculate_duplicate_app_position(app_pos, user_index)
         new_app = api.AddAppToReservation(reservationId=sandbox_id, appName=app.AppTemplateName,
+                                          deploymentPath=default_deployment_option.Name,
                                           positionX=new_app_pos.X, positionY=new_app_pos.Y)
 
         # todo - update all attributes in new app from original app. At the moment we only update Private IP attr but
         #  if other attributes were changed on the reservation app the duplicate will not get it because we are adding
         #  the duplicate from the app template
+
+
+
         new_private_ip_attr_val = self._get_private_ip_value_for_duplicate_app(app, user_index)
 
         attributes_to_update = [NameValuePair(PRIVATE_IP_ATTR, new_private_ip_attr_val)] \
             if new_private_ip_attr_val else []
+
+        #for attr in default_deployment_option.DeploymentService.Attributes:
+        #    attributes_to_update.append(NameValuePair(attr.Name, attr.Value))
 
         # update new app with new name and with updated value to Private IP attribute
         return self._components_service.create_update_app_request(
@@ -182,8 +189,6 @@ class InitializeEnvironmentLogic:
                                                                                        PRIVATE_IP_ATTR)
         if not requested_ips_string:
             return None
-
-        # todo - add validation to check if we have a range bigger then the increment
 
         self._sandbox_output.debug_print(f'original ip for {app.Name} it is: {requested_ips_string}')
         incremented_ips_string = self._ips_increment_provider.increment_requested_ips_string(

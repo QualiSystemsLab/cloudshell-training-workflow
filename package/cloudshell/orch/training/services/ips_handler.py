@@ -27,7 +27,7 @@ class IPsHandlerService:
         return new_ip_str
 
     def increment_ip_range(self, ip: str, increment_octet: str, increment_size: int) -> str:
-        self.validate_ip_address_range(ip)
+        self.validate_ip_address_range(ip, increment_size, increment_octet)
 
         address_and_range = ip.split('-')
         address = address_and_range[0]
@@ -42,21 +42,31 @@ class IPsHandlerService:
 
         return new_ip_str
 
-    def validate_ip_address_range(self, ip: str):
+    def validate_ip_address_range(self, ip: str, increment_size: int, increment_octet: str):
         address_and_range = ip.split('-')
-        if not len(address_and_range) == 2:
+        if not (len(address_and_range) == 2 or len(address_and_range) == 0):
             raise ValueError(f'{ip} is not a valid IP Address range. Valid example: 10.0.0.1-10')
         # also validate that the IP address part of the range has a valid IP address
         self.validate_ip_address(address_and_range[0])
-        # todo validate that the range is legal
+        self.validate_range(address_and_range[0], address_and_range[1], increment_size,increment_octet)
 
-    def validate_ip_address(self, ip):
+    def validate_ip_address(self, ip: str):
         # if ip address is not valid the following line will raise an exception
         ipaddress.ip_address(ip)
 
-    def is_range(self, ip: str) -> bool:
+    def validate_range(self, ip: str, ip_range: str, increment_size: int, increment_octet: str):
+        # if range is not valid the following line will raise an exception
+        last_octet = ip.split('.')[3]
+
         try:
-            self.validate_ip_address_range(ip)
-            return True
-        except:
-            return False
+            ip_range_int = int(ip_range)
+            last_octet_int = int(last_octet)
+            if ip_range_int > increment_size and increment_octet == '/24':
+                raise ValueError(f'{ip_range_int} is higher than increment configured: {increment_size}')
+            if last_octet_int+ip_range_int > 255:
+                raise ValueError(f'{ip_range_int} is not a valid Address range as {last_octet}+{ip_range_int}>255')
+        except ValueError:
+            raise ValueError(f'{range} is not a valid Address range. Valid example: 10.0.0.1-10')
+
+    def is_range(self, ip: str) -> bool:
+        return len(ip.split('-')) == 2
