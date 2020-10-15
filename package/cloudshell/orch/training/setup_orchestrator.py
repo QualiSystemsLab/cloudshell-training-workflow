@@ -25,7 +25,6 @@ class TrainingSetupWorkflow(object):
         # bootstrap setup workflow data and services
         self._bootstrap()
 
-    # todo - consider moving to a bootstrap class
     def _bootstrap(self):
         self.sandbox.logger.info("Bootstrapping setup workflow")
 
@@ -87,7 +86,7 @@ class TrainingSetupWorkflow(object):
             self.sandbox.logger.debug("Create user sandboxes logic is added to sandbox orchestration")
             self.sandbox.workflow.on_configuration_ended(self._do_on_configuration_ended, None)
 
-    def _do_on_configuration_ended(self, sandbox: Sandbox, components):
+    def _do_on_configuration_ended(self, sandbox, components):
         self.user_sandbox_logic.create_user_sandboxes(sandbox, components)
         # persist to sandbox data the users data
         self._users_data_manager.save()

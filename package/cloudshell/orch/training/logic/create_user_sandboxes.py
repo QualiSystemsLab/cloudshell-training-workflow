@@ -29,7 +29,7 @@ class UserSandboxesLogic:
         self._student_links_provider = student_links_provider
         self._apps_service = apps_service
 
-    def create_user_sandboxes(self, sandbox: Sandbox, components):
+    def create_user_sandboxes(self, sandbox, components):
 
         if not self._env_data.users_list:
             return

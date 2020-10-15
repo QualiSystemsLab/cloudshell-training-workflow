@@ -27,5 +27,5 @@ class StudentLinksProvider:
             created_token = self._sandbox_api.create_token(admin_token, user, domain)
         except CloudShellAPIError as exc:
             self._sandbox.logger.exception(f"Creating trainee token for {user} failed - exception occurred")
-            raise exc
+            raise
         return created_token
