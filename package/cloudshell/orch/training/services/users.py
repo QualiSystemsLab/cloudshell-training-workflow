@@ -44,7 +44,7 @@ class UsersService:
         self._api.UpdateUser(user, user, isActive=False)
 
     def create_or_activate_training_user(self, user: str):
-        self._logger.debug(f'create or activate user {user}')
+        self._logger.debug(f'Creating/Activating user {user}')
         try:
             system_user = self._api.GetUserDetails(user)
             self._logger.debug(f'user {user} exist')

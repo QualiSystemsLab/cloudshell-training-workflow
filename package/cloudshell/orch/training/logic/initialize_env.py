@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 from cloudshell.api.cloudshell_api import AttributeNameValue, Connector, ReservationAppResource, \
     ReservationDescriptionInfo, CloudShellAPISession, ApiEditAppRequest, SetConnectorRequest, \
@@ -48,6 +48,7 @@ class InitializeEnvironmentLogic:
         self._duplicate_students_apps(sandbox)
 
     def _create_or_activate_users(self, sandbox: Sandbox):
+        sandbox.logger.info("Creating or activating users")
         self._sandbox_output.notify("Creating or activating users")
 
         # create a group for the training users in current sandbox domain, will be removed during teardown
@@ -62,6 +63,7 @@ class InitializeEnvironmentLogic:
         self._sandbox_service.clear_sandbox_components(sandbox)
 
     def _duplicate_students_apps(self, sandbox: Sandbox):
+        sandbox.logger.info("Starting to duplicate student apps process")
         api = sandbox.automation_api
         sandbox.components.refresh_components(sandbox)
         apps = [app.app_request.app_resource for app in sandbox.components.apps.values()]
@@ -174,7 +176,7 @@ class InitializeEnvironmentLogic:
     def _calculate_duplicate_app_position(self, app_pos: Position, user_index: int) -> Position:
         return Position(app_pos.X, app_pos.Y + 100 * (user_index + 1))
 
-    def _get_private_ip_value_for_duplicate_app(self, app: ReservationAppResource, user_index: int) -> str:
+    def _get_private_ip_value_for_duplicate_app(self, app: ReservationAppResource, user_index: int) -> Optional[str]:
         default_deployment_path = self._components_service.get_default_deployment_option(app)
         requested_ips_string = self._components_service.get_deployment_attribute_value(default_deployment_path,
                                                                                        PRIVATE_IP_ATTR)
