@@ -36,6 +36,39 @@ class TestUsersService(unittest.TestCase):
         self.api.AddNewGroup.assert_called_once_with(group_name, ANY, 'Regular')
         self.api.AddGroupsToDomain.assert_called_once_with(domain, [group_name])
 
+    def test_create_training_users_group_ex135(self):
+        # arrange
+        sandbox_id = Mock()
+        domain = Mock()
+        group_name = Mock()
+        self.users_service.get_training_users_group_name = Mock(return_value=group_name)
+        def raise_group_name_already_exists(*args, **kwargs):
+            raise CloudShellAPIError('135', Mock(), Mock())
+
+        self.api.AddNewGroup.side_effect = raise_group_name_already_exists
+
+        # assert & act
+        try:
+            self.users_service.create_training_users_group(sandbox_id, domain)
+        except CloudShellAPIError:
+            self.fail("create_training_users_group() raised ExceptionType unexpectedly!")
+
+    def test_create_training_users_group_ex_not135(self):
+        # arrange
+        sandbox_id = Mock()
+        domain = Mock()
+        group_name = Mock()
+        self.users_service.get_training_users_group_name = Mock(return_value=group_name)
+        def raise_group_ex(*args, **kwargs):
+            raise CloudShellAPIError(Mock(), Mock(), Mock())
+
+        self.api.AddNewGroup.side_effect = raise_group_ex
+
+        # act & assert
+        with self.assertRaises(CloudShellAPIError):
+            self.users_service.create_training_users_group(sandbox_id, domain)
+
+
     def test_delete_training_users_group(self):
         # arrange
         sandbox_id = Mock()

@@ -2,10 +2,12 @@ import unittest
 
 from cloudshell.api.cloudshell_api import CloudShellAPISession, GetReservationDescriptionResponseInfo, \
     ReservedResourceInfo, ServiceInstance, ReservationAppResource
+from cloudshell.api.common_cloudshell_api import CloudShellAPIError
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 from mock import Mock, patch
 
 from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
+from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService
 
 
 class TestSandboxCreateService(unittest.TestCase):
@@ -91,6 +93,31 @@ class TestSandboxTerminateService(unittest.TestCase):
         self.admin_login_token = Mock()
         self.logic = SandboxLifecycleService(self.sandbox, self.sandbox_output_service,self.users_data_manager)
 
+    def test_end_student_reservation_student(self):
+        # arrange
+        mock_obj = Mock()
+        mock_obj.ReservationSlimStatus.Status = "NotCompleted"
+
+        mock_api: CloudShellAPISession = Mock()
+        mock_reservation_description = Mock()
+        mock_resource: ReservedResourceInfo = Mock()
+        mock_resource.Name = "mock_resource_name"
+        mock_reservation_description.Resources = [mock_resource]
+
+        mock_get_reservation_details: GetReservationDescriptionResponseInfo = Mock()
+        mock_get_reservation_details.ReservationDescription = mock_reservation_description
+
+        mock_api.GetReservationDetails = Mock(return_value=mock_get_reservation_details)
+        mock_api.GetReservationStatus = Mock(return_value=mock_obj)
+        self.logic._api = mock_api
+
+        self.logic._sandbox.id = "mock_user_reservation_id"
+        # act
+        self.logic.end_student_reservation(Mock(),False)
+
+        # assert
+        self.logic._api.ExecuteCommand.assert_called_once_with("mock_user_reservation_id", "mock_resource_name", "Resource", "Power Off", [], True)
+
     def test_end_student_reservation_already_complete(self):
         # arrange
         mock_obj = Mock()
@@ -166,3 +193,50 @@ class TestSandboxTerminateService(unittest.TestCase):
         mock_sandbox.automation_api.RemoveResourcesFromReservation.assert_called_once_with(mock_sandbox.id,[mock_resource.Name])
         mock_sandbox.automation_api.RemoveServicesFromReservation.assert_called_once_with(mock_sandbox.id,[mock_service.Alias])
         mock_sandbox.automation_api.RemoveAppFromReservation.assert_called_once_with(mock_sandbox.id,appName=mock_app.Name)
+
+    def test_clear_sandbox_components_empty(self):
+        # arrange
+        mock_sandbox: Sandbox = Mock()
+        mock_sandbox.id = "sandbox_id"
+        mock_api: CloudShellAPISession = Mock()
+        mock_sandbox.automation_api = mock_api
+        mock_get_reservation_details:GetReservationDescriptionResponseInfo = Mock()
+        mock_reservation_description = Mock()
+        mock_reservation_description.Resources = []
+        mock_reservation_description.Services = []
+        mock_reservation_description.Apps = []
+        mock_get_reservation_details.ReservationDescription = mock_reservation_description
+        mock_api.GetReservationDetails = Mock(return_value=mock_get_reservation_details)
+
+        # act
+        self.logic.clear_sandbox_components(mock_sandbox)
+
+        # assert
+        mock_sandbox.automation_api.RemoveResourcesFromReservation.assert_not_called()
+        mock_sandbox.automation_api.RemoveServicesFromReservation.assert_not_called()
+        mock_sandbox.automation_api.RemoveAppFromReservation.assert_not_called()
+
+    def test_clear_sandbox_components_ex(self):
+        # arrange
+        mock_sandbox: Sandbox = Mock()
+        mock_sandbox.id = "sandbox_id"
+        mock_api: CloudShellAPISession = Mock()
+        mock_sandbox.automation_api = mock_api
+        mock_get_reservation_details:GetReservationDescriptionResponseInfo = Mock()
+        mock_reservation_description = Mock()
+        mock_reservation_description.Resources = []
+        mock_service: ServiceInstance = Mock()
+        mock_service.Alias = "mock_alias"
+        mock_reservation_description.Services = [mock_service]
+        mock_reservation_description.Apps = []
+        mock_get_reservation_details.ReservationDescription = mock_reservation_description
+        mock_api.GetReservationDetails = Mock(return_value=mock_get_reservation_details)
+        mock_api.RemoveServicesFromReservation = Mock(return_value=Exception)
+
+        mock_api.RemoveServicesFromReservation.side_effect = Exception('')
+
+        # act
+        self.logic.clear_sandbox_components(mock_sandbox)
+
+        # assert
+        mock_sandbox.logger.exception.assert_called_once()
