@@ -15,13 +15,13 @@ class SandboxInputsParser:
         return env_data
 
     @staticmethod
-    def _is_debug_on(sandbox):
+    def _is_debug_on(sandbox: Sandbox) -> bool:
         if 'Diagnostics' in sandbox.global_inputs:
             return sandbox.global_inputs['Diagnostics'] == 'On'
         return False
 
     @staticmethod
-    def _sandbox_user_list(sandbox) -> List[str]:
+    def _sandbox_user_list(sandbox: Sandbox) -> List[str]:
         users_list = SandboxInputsParser._split_training_users_input(sandbox)
         if users_list and len(users_list) == 1 and '#' in users_list[0]:
             # for now we remove the user ID after the hash tag, in the future we might need to parse it into its own
@@ -33,13 +33,13 @@ class SandboxInputsParser:
         return users_list
 
     @staticmethod
-    def _split_training_users_input(sandbox) -> List[str]:
+    def _split_training_users_input(sandbox: Sandbox) -> List[str]:
         if "Training Users" in sandbox.global_inputs:
             return sandbox.global_inputs.get('Training Users', '').split(";")
         return []
 
     @staticmethod
-    def _is_instructor_mode(sandbox):
+    def _is_instructor_mode(sandbox: Sandbox):
         # if "#" in user list than this would be student_mode meaning instructor_mode=False
         user_list = SandboxInputsParser._split_training_users_input(sandbox)
         return not (user_list and '#' in user_list[0])

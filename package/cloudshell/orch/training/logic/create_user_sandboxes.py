@@ -2,9 +2,8 @@ from datetime import datetime
 from typing import List
 
 from cloudshell.api.cloudshell_api import ReservationDescriptionInfo
+from cloudshell.api.common_cloudshell_api import CloudShellAPIError
 from cloudshell.workflow.orchestration.sandbox import Sandbox
-
-from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.position import Position
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
 from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
@@ -37,6 +36,7 @@ class UserSandboxesLogic:
             return
 
         self._sandbox_output.notify("Creating User Sandboxes")
+        sandbox.logger.info("Starting to the User Sandboxes creation process")
 
         sandbox_details = self._get_latest_sandbox_details(sandbox)
 
@@ -47,6 +47,7 @@ class UserSandboxesLogic:
         self._wait_for_active_sandboxes_and_add_duplicated_resources(sandbox, sandbox_details)
 
         # Send emails to all users
+        sandbox.logger.info("Starting to Send emails to all users")
         self._send_emails()
 
     def _get_latest_sandbox_details(self, sandbox: Sandbox) -> ReservationDescriptionInfo:
@@ -63,6 +64,7 @@ class UserSandboxesLogic:
 
     def _wait_for_active_sandboxes_and_add_duplicated_resources(self, sandbox: Sandbox,
                                                                 sandbox_details: ReservationDescriptionInfo):
+
         resource_positions_dict = self._get_resource_positions(sandbox)
         shared_resources = self._get_shared_resources(sandbox)
 
@@ -105,35 +107,41 @@ class UserSandboxesLogic:
         return shared_resources
 
     def _create_user_sandboxes(self, sandbox: Sandbox, sandbox_details: ReservationDescriptionInfo):
-        duration = self._calculate_user_sandbox_duration(sandbox_details)
+        new_sandbox_duration = self._calculate_user_sandbox_duration(sandbox_details)
 
+        sandbox.logger.info("Creating sandboxes per user")
         for user in self._env_data.users_list:
+            try:
+                # 1. create new trainee sandbox
+                sandbox.logger.info(f"Creating sandbox for {user}")
+                new_sandbox = self._sandbox_create_service.create_trainee_sandbox(
+                    sandbox.reservationContextDetails.environment_path, user,
+                    self._users_data.get_key(user, userDataKeys.ID), new_sandbox_duration)
 
-            # 1. create new trainee sandbox
-            new_sandbox = self._sandbox_create_service.create_trainee_sandbox(
-                sandbox.reservationContextDetails.environment_path, user,
-                self._users_data.get_key(user, userDataKeys.ID), duration)
+                # 2. generate student link and to sandbox data
+                sandbox.logger.info(f"Creating token for {user}")
+                student_link_model = self._student_links_provider.create_student_link(user, new_sandbox.Id)
 
-            # 2. generate student link and to sandbox data
-            student_link_model = self._student_links_provider.create_student_link(user, new_sandbox.Id)
+                # 3. save important data to sandbox data
+                self._users_data.add_or_update(user, userDataKeys.TOKEN, student_link_model.token)
+                self._users_data.add_or_update(user, userDataKeys.STUDENT_LINK, student_link_model.student_link)
+                self._users_data.add_or_update(user, userDataKeys.SANDBOX_ID, new_sandbox.Id)
 
-            # 3. save important data to sandbox data
-            self._users_data.add_or_update(user, userDataKeys.TOKEN, student_link_model.token)
-            self._users_data.add_or_update(user, userDataKeys.STUDENT_LINK, student_link_model.student_link)
-            self._users_data.add_or_update(user, userDataKeys.SANDBOX_ID, new_sandbox.Id)
-
-            # 4. notify instructor about trainee link
-            msg = f'<a href="{student_link_model.student_link}" style="font-size:16px">Trainee Sandbox - {user}</a>'
-            self._sandbox_output.notify(f'Trainee link for {user}: {msg}')
+                # 4. notify instructor about trainee link
+                msg = f'<a href="{student_link_model.student_link}" style="font-size:16px">Trainee Sandbox - {user}</a>'
+                self._sandbox_output.notify(f'Trainee link for {user}: {msg}')
+            except CloudShellAPIError as exc:
+                sandbox.logger.exception(f"Creating trainee sandbox for {user} failed - exception occurred")
+                raise
 
     def _calculate_user_sandbox_duration(self, sandbox_details: ReservationDescriptionInfo) -> int:
         """
         :return: user sandbox duration in minutes
         """
+        
         end_time = datetime.strptime(sandbox_details.EndTime, '%m/%d/%Y %H:%M')
         duration_until_instructor_sandbox_ends = int((end_time - datetime.utcnow()).total_seconds() / 60)
         # we want to add a buffer to the duration of a student sandbox to make sure that the instructor teardown
         # will run before the student sandbox teardown. Adding buffer of 15 minutes.
         duration_with_buffer = duration_until_instructor_sandbox_ends + 15
         return duration_with_buffer
-

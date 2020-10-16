@@ -38,6 +38,7 @@ class SandboxTerminateLogic:
                             'Please check logs for more details"</font>')
 
     def _teardown_student_sandboxes_inner(self, sandbox: Sandbox):
+        sandbox.logger.info("Starting tearing down process")
         # todo - move to workflow or some singleton provider?
         admin_token = self._sandbox_api.login()
 
@@ -50,4 +51,5 @@ class SandboxTerminateLogic:
                                            user_token=self._users_data_manager.get_key(user, userDataKeys.TOKEN))
 
         if self._training_env.instructor_mode:
+            sandbox.logger.info("Deleting user group")
             self._delete_students_group(sandbox)

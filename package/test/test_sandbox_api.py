@@ -50,3 +50,14 @@ class TestSandboxApiService(unittest.TestCase):
         # assert
         self.sandbox_api_service._requests_session.delete.assert_called_once()
         self.assertFalse(delete_return)
+
+    def test_login(self):
+        # arrange
+        mock_json = Mock()
+        self.sandbox_api_service._requests_session.put = Mock(return_value=mock_json)
+        # act
+        login_return = self.sandbox_api_service.login()
+
+        # assert
+        self.sandbox_api_service._requests_session.put.assert_called_once()
+        self.assertEqual(login_return,mock_json.json())
