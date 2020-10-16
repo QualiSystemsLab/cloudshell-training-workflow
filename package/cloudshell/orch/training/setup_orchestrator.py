@@ -7,7 +7,7 @@ from cloudshell.orch.training.logic.initialize_env import InitializeEnvironmentL
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
 from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
-from cloudshell.email.email import EmailService
+from cloudshell.email import EmailService
 from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
 from cloudshell.orch.training.services.ips_handler import IPsHandlerService
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
