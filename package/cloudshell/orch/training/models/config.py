@@ -1,7 +1,7 @@
 from typing import Dict
 
 from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
-from cloudshell.email_config import EmailConfig
+from cloudshell.email import EmailConfig
 
 
 # todo - add config validations
