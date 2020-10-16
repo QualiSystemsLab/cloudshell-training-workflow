@@ -5,7 +5,6 @@ from cloudshell.orch.training.parsers.sandbox_inputs_processing import SandboxIn
 from cloudshell.orch.training.logic.create_user_sandboxes import UserSandboxesLogic
 from cloudshell.orch.training.logic.initialize_env import InitializeEnvironmentLogic
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
-from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
 from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
 from cloudshell.email import EmailService
 from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
@@ -26,7 +25,6 @@ class TrainingSetupWorkflow(object):
         # bootstrap setup workflow data and services
         self._bootstrap()
 
-    # todo - consider moving to a bootstrap class
     def _bootstrap(self):
         self.sandbox.logger.info("Bootstrapping setup workflow")
 
@@ -92,4 +90,3 @@ class TrainingSetupWorkflow(object):
         self.user_sandbox_logic.create_user_sandboxes(sandbox, components)
         # persist to sandbox data the users data
         self._users_data_manager.save()
-

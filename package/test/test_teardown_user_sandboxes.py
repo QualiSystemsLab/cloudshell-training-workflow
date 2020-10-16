@@ -50,3 +50,45 @@ class TestTeardownUserSandboxes(unittest.TestCase):
 
         # assert
         self.logic._users_service.delete_training_users_group(sandbox.id)
+
+    def test_execute_teardown_safely(self):
+        # arrange
+        def raise_general_ex(*args, **kwargs):
+            raise Exception()
+        mock_sandbox = Mock()
+        mock_sandbox.logger = Mock()
+        self.logic._teardown_student_sandboxes_inner = Mock()
+
+        self.logic._teardown_student_sandboxes_inner.side_effect = raise_general_ex
+
+        # act
+        self.logic._execute_teardown_safely(mock_sandbox)
+
+        # assert
+        mock_sandbox.logger.exception.assert_called_once()
+
+    def test_teardown_student_sandboxes_inner_instructor(self):
+        # arrange
+        mock_sandbox = Mock()
+        self.logic._delete_students_group = Mock()
+        self.logic._training_env.instructor_mode = True
+        self.logic._training_env.users_list=[]
+
+        # act
+        self.logic._teardown_student_sandboxes_inner(mock_sandbox)
+
+        # assert
+        self.logic._delete_students_group.assert_called_once()
+
+    def test_teardown_student_sandboxes_inner_student(self):
+        # arrange
+        mock_sandbox = Mock()
+        self.logic._delete_students_group = Mock()
+        self.logic._training_env.instructor_mode = False
+        self.logic._training_env.users_list=[]
+
+        # act
+        self.logic._teardown_student_sandboxes_inner(mock_sandbox)
+
+        # assert
+        self.logic._delete_students_group.assert_not_called()

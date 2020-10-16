@@ -20,10 +20,10 @@ class SandboxAPIService:
         """
         r = self._requests_session.put(f'http://{self._sandbox.connectivityContextDetails.server_address}:{self._port}/api/login',
                                        json={
-                            "username": self._sandbox.connectivityContextDetails.admin_user,
-                            "password": self._sandbox.connectivityContextDetails.admin_pass,
-                            "domain": self._sandbox.reservationContextDetails.domain
-                        })
+                                            "username": self._sandbox.connectivityContextDetails.admin_user,
+                                            "password": self._sandbox.connectivityContextDetails.admin_pass,
+                                            "domain": self._sandbox.reservationContextDetails.domain
+                                       })
         return r.json()
 
     def create_token(self, api_token: str, user: str, domain: str) -> str:
@@ -45,7 +45,7 @@ class SandboxAPIService:
         authorization = f"Basic {api_token}"
         headers = {'Content-type': 'application/json', 'Authorization': authorization}
         r = self._requests_session.delete(f'http://{self._sandbox.connectivityContextDetails.server_address}:{self._port}'
-                           f'/api/Token/{user_token}', headers=headers)
+            f'/api/Token/{user_token}', headers=headers)
         if r.status_code != 200:
             self._sandbox_output.debug_print("Error deleting token: Code="+str(r.status_code))
             return False

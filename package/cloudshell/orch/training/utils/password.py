@@ -1,4 +1,3 @@
-import random
 import secrets
 import string
 
@@ -6,7 +5,7 @@ import string
 class PasswordUtils:
 
     @ staticmethod
-    def generate_random_password(length=12):
+    def generate_random_password(length=12) -> str:
         """
         Creates a new random password for a new user.
         """

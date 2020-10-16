@@ -2,7 +2,8 @@ import unittest
 from typing import List, Dict
 
 from cloudshell.api.cloudshell_api import Connector, ReservationAppResource, ReservationDescriptionInfo, \
-    ServiceInstance, CloudShellAPISession, ResourceDiagramLayoutInfo, ReservationDiagramLayoutResponseInfo
+    ServiceInstance, CloudShellAPISession, ResourceDiagramLayoutInfo, ReservationDiagramLayoutResponseInfo, \
+    AttributeValueInfo
 from mock import Mock
 
 from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
@@ -258,3 +259,30 @@ class TestSandboxComponentsHelperService(unittest.TestCase):
 
         # assert
         self.assertEqual(result, {mock_resource_name: Position(mock_x,mock_y)})
+
+    def test_does_connector_has_existing_vnic_req_no_value(self):
+        # arrange
+        mock_app: ReservationAppResource = Mock()
+        mock_connector: Connector = Mock()
+        mock_connectors = [mock_connector]
+        mock_vnic_request_attribute:AttributeValueInfo = Mock()
+        self.sandbox_comp_helper.get_requested_vnic_attribute = Mock(return_value=mock_vnic_request_attribute)
+
+        # act
+        result = self.sandbox_comp_helper.does_connector_has_existing_vnic_req(mock_app,mock_connectors)
+        # assert
+        self.assertTrue(result)
+
+    def test_does_connector_has_existing_vnic_req_with_value(self):
+        # arrange
+        mock_app: ReservationAppResource = Mock()
+        mock_connector: Connector = Mock()
+        mock_connectors = [mock_connector]
+        mock_vnic_request_attribute: AttributeValueInfo = Mock()
+        mock_vnic_request_attribute.Value = None
+        self.sandbox_comp_helper.get_requested_vnic_attribute = Mock(return_value=mock_vnic_request_attribute)
+
+        # act
+        result = self.sandbox_comp_helper.does_connector_has_existing_vnic_req(mock_app, mock_connectors)
+        # assert
+        self.assertFalse(result)
