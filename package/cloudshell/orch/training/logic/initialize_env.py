@@ -16,6 +16,7 @@ from cloudshell.orch.training.services.sandbox_output import SandboxOutputServic
 from cloudshell.orch.training.services.users import UsersService
 from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService, \
     UsersDataManagerServiceKeys as userDataKeys
+from cloudshell.email import EmailService
 
 PRIVATE_IP_ATTR = "Private IP"
 
@@ -154,8 +155,10 @@ class InitializeEnvironmentLogic:
                                               app: ReservationAppResource, sandbox_id: str, app_pos: Position,
                                               user_index: int) -> ApiEditAppRequest:
         # add duplicate app in new position
+        default_deployment_option_name = self._components_service.get_default_deployment_option(app).Name
         new_app_pos = self._calculate_duplicate_app_position(app_pos, user_index)
         new_app = api.AddAppToReservation(reservationId=sandbox_id, appName=app.AppTemplateName,
+                                          deploymentPath=default_deployment_option_name,
                                           positionX=new_app_pos.X, positionY=new_app_pos.Y)
 
         # todo - update all attributes in new app from original app. At the moment we only update Private IP attr but
@@ -221,17 +224,17 @@ class InitializeEnvironmentLogic:
             # if we detected a management connector and Requested vNIC was not set on any connector then we set
             # the management connector with index 0 and explicitly assign consecutive index values to all other
             # connectors for current app
-            if mgmt_connector and not has_existing_vnic_req:
-                self._sandbox_output.debug_print(f'Setting management connection for {app.Name}')
-                connectors_attr_updates.append(
-                    self._prepare_connector_change_req(app, mgmt_connector, '0'))
+            # if mgmt_connector and not has_existing_vnic_req:
+            self._sandbox_output.debug_print(f'Setting management connection for {app.Name}')
+            connectors_attr_updates.append(
+                self._prepare_connector_change_req(app, mgmt_connector, '0'))
 
-                for index, connector in enumerate(connectors):
-                    if connector == mgmt_connector:
-                        continue
-                    vnic_index = index + 1
-                    connectors_attr_updates.append(
-                        self._prepare_connector_change_req(app, connector, str(vnic_index)))
+            for index, connector in enumerate(connectors):
+                if connector == mgmt_connector:
+                    continue
+                vnic_index = index + 1
+                connectors_attr_updates.append(
+                    self._prepare_connector_change_req(app, connector, str(vnic_index)))
 
         return connectors_attr_updates
 
