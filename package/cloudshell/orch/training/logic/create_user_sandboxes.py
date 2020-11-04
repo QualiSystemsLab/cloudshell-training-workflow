@@ -7,7 +7,8 @@ from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.orch.training.models.position import Position
 from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
 from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
-from cloudshell.orch.training.services.email import EmailService
+from cloudshell.email import EmailService
+from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
 from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
 from cloudshell.orch.training.services.student_links import StudentLinksProvider
@@ -58,7 +59,7 @@ class UserSandboxesLogic:
         if self._email_service.is_email_configured():
             for user in self._env_data.users_list:
                 student_link = self._users_data.get_key(user, userDataKeys.STUDENT_LINK)
-                self._email_service.send_email(user, student_link)
+                self._email_service.send_email([user], 'Welcome to Training', template_parameters={'sandbox_link': student_link})
                 self._sandbox_output.notify(f'Sending email to {user} with link={student_link}')
 
     def _wait_for_active_sandboxes_and_add_duplicated_resources(self, sandbox: Sandbox,
