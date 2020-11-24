@@ -3,8 +3,8 @@ from time import sleep
 from cloudshell.api.cloudshell_api import UpdateTopologyGlobalInputsRequest, ReservationShortInfo, CloudShellAPISession
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
-from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
-from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService, \
+from cloudshell.workflow.training.services.sandbox_output import SandboxOutputService
+from cloudshell.workflow.training.services.users_data_manager import UsersDataManagerService, \
     UsersDataManagerServiceKeys as userDataKeys
 
 

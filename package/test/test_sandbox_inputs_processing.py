@@ -3,7 +3,7 @@ import unittest
 from mock import Mock, patch
 
 
-from cloudshell.orch.training.parsers.sandbox_inputs_processing import SandboxInputsParser
+from cloudshell.workflow.training.parsers.sandbox_inputs_processing import SandboxInputsParser
 
 class TestSandboxInputsParser(unittest.TestCase):
     def setUp(self) -> None:
@@ -92,9 +92,9 @@ class TestSandboxInputsParser(unittest.TestCase):
         # assert
         self.assertTrue(flag)
 
-    @patch("cloudshell.orch.training.parsers.sandbox_inputs_processing.SandboxInputsParser._sandbox_user_list")
-    @patch("cloudshell.orch.training.parsers.sandbox_inputs_processing.SandboxInputsParser._is_instructor_mode")
-    @patch("cloudshell.orch.training.parsers.sandbox_inputs_processing.SandboxInputsParser._is_debug_on")
+    @patch("cloudshell.workflow.training.parsers.sandbox_inputs_processing.SandboxInputsParser._sandbox_user_list")
+    @patch("cloudshell.workflow.training.parsers.sandbox_inputs_processing.SandboxInputsParser._is_instructor_mode")
+    @patch("cloudshell.workflow.training.parsers.sandbox_inputs_processing.SandboxInputsParser._is_debug_on")
     def test_parse_sandbox_inputs(self,sandbox_user_list_patch: Mock,is_instructor_mode_patch: Mock,is_debug_on_patch: Mock):
         sandbox_user_list_patch.return_value = Mock()
         is_instructor_mode_patch.return_value = Mock()

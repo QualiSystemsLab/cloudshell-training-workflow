@@ -1,21 +1,21 @@
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.workflow.orchestration.setup.default_setup_orchestrator import DefaultSetupWorkflow
 
-from cloudshell.orch.training.parsers.sandbox_inputs_processing import SandboxInputsParser
-from cloudshell.orch.training.logic.create_user_sandboxes import UserSandboxesLogic
-from cloudshell.orch.training.logic.initialize_env import InitializeEnvironmentLogic
-from cloudshell.orch.training.models.config import TrainingWorkflowConfig
-from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
-from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
-from cloudshell.orch.training.services.email import EmailService
-from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
-from cloudshell.orch.training.services.ips_handler import IPsHandlerService
-from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
-from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
-from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
-from cloudshell.orch.training.services.student_links import StudentLinksProvider
-from cloudshell.orch.training.services.users import UsersService
-from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService
+from cloudshell.workflow.training.parsers.sandbox_inputs_processing import SandboxInputsParser
+from cloudshell.workflow.training.logic.create_user_sandboxes import UserSandboxesLogic
+from cloudshell.workflow.training.logic.initialize_env import InitializeEnvironmentLogic
+from cloudshell.workflow.training.models.config import TrainingWorkflowConfig
+from cloudshell.workflow.training.models.training_env import TrainingEnvironmentDataModel
+from cloudshell.workflow.training.services.sandbox_components import SandboxComponentsHelperService
+from cloudshell.workflow.training.services.email import EmailService
+from cloudshell.workflow.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
+from cloudshell.workflow.training.services.ips_handler import IPsHandlerService
+from cloudshell.workflow.training.services.sandbox_api import SandboxAPIService
+from cloudshell.workflow.training.services.sandbox_lifecycle import SandboxLifecycleService
+from cloudshell.workflow.training.services.sandbox_output import SandboxOutputService
+from cloudshell.workflow.training.services.student_links import StudentLinksProvider
+from cloudshell.workflow.training.services.users import UsersService
+from cloudshell.workflow.training.services.users_data_manager import UsersDataManagerService
 
 
 class TrainingSetupWorkflow(object):

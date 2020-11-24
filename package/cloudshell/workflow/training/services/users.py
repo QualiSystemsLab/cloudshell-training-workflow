@@ -4,7 +4,7 @@ from typing import List
 from cloudshell.api.cloudshell_api import CloudShellAPISession
 from cloudshell.api.common_cloudshell_api import CloudShellAPIError
 
-from cloudshell.orch.training.utils.password import PasswordUtils
+from cloudshell.workflow.training.utils.password import PasswordUtils
 
 
 class UsersService:

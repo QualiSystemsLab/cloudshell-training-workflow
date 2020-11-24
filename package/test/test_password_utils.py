@@ -1,6 +1,6 @@
 import unittest
 
-from cloudshell.orch.training.utils.password import PasswordUtils
+from cloudshell.workflow.training.utils.password import PasswordUtils
 
 
 class TestPasswordUtils(unittest.TestCase):

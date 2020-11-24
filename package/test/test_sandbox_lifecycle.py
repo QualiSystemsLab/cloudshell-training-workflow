@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock, patch
 
-from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
+from cloudshell.workflow.training.services.sandbox_lifecycle import SandboxLifecycleService
 
 
 class TestSandboxCreateService(unittest.TestCase):
@@ -27,7 +27,7 @@ class TestSandboxCreateService(unittest.TestCase):
         # assert
         self.assertEqual(result, new_reservation.Reservation)
 
-    @patch("cloudshell.orch.training.services.sandbox_lifecycle.sleep")
+    @patch("cloudshell.workflow.training.services.sandbox_lifecycle.sleep")
     def test_wait_ready(self, sleep_patch):
         # arrange
         sandbox = Mock(automation_api=Mock())
@@ -39,7 +39,7 @@ class TestSandboxCreateService(unittest.TestCase):
         # act & assert
         sandbox_create_service.wait_ready(Mock(), Mock())
 
-    @patch("cloudshell.orch.training.services.sandbox_lifecycle.sleep")
+    @patch("cloudshell.workflow.training.services.sandbox_lifecycle.sleep")
     def test_wait_error(self, sleep_patch):
         # arrange
         sandbox = Mock(automation_api=Mock())
@@ -51,7 +51,7 @@ class TestSandboxCreateService(unittest.TestCase):
         with self.assertRaises(Exception):
             sandbox_create_service.wait_ready(Mock(), Mock())
 
-    @patch("cloudshell.orch.training.services.sandbox_lifecycle.sleep")
+    @patch("cloudshell.workflow.training.services.sandbox_lifecycle.sleep")
     def test_wait_teardown(self, sleep_patch):
         # arrange
         sandbox = Mock(automation_api=Mock())
@@ -63,7 +63,7 @@ class TestSandboxCreateService(unittest.TestCase):
         with self.assertRaises(Exception):
             sandbox_create_service.wait_ready(Mock(), Mock())
 
-    @patch("cloudshell.orch.training.services.sandbox_lifecycle.sleep")
+    @patch("cloudshell.workflow.training.services.sandbox_lifecycle.sleep")
     def test_wait_completed(self, sleep_patch):
         # arrange
         sandbox = Mock(automation_api=Mock())

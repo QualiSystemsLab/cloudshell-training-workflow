@@ -1,14 +1,14 @@
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.workflow.orchestration.teardown.default_teardown_orchestrator import DefaultTeardownWorkflow
 
-from cloudshell.orch.training.models.config import TrainingWorkflowConfig
-from cloudshell.orch.training.parsers.sandbox_inputs_processing import SandboxInputsParser
-from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
-from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
-from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
-from cloudshell.orch.training.logic.teardown_user_sandboxes import SandboxTerminateLogic
-from cloudshell.orch.training.services.users import UsersService
-from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService
+from cloudshell.workflow.training.models.config import TrainingWorkflowConfig
+from cloudshell.workflow.training.parsers.sandbox_inputs_processing import SandboxInputsParser
+from cloudshell.workflow.training.services.sandbox_api import SandboxAPIService
+from cloudshell.workflow.training.services.sandbox_lifecycle import SandboxLifecycleService
+from cloudshell.workflow.training.services.sandbox_output import SandboxOutputService
+from cloudshell.workflow.training.logic.teardown_user_sandboxes import SandboxTerminateLogic
+from cloudshell.workflow.training.services.users import UsersService
+from cloudshell.workflow.training.services.users_data_manager import UsersDataManagerService
 
 
 class TrainingTeardownWorkflow(object):

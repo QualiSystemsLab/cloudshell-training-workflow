@@ -1,7 +1,7 @@
 import requests
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
-from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
+from cloudshell.workflow.training.services.sandbox_output import SandboxOutputService
 
 
 class SandboxAPIService:

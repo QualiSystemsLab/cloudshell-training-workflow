@@ -6,8 +6,8 @@ from collections import namedtuple
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from cloudshell.orch.training.models.config import EmailConfig
-from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
+from cloudshell.workflow.training.models.config import EmailConfig
+from cloudshell.workflow.training.services.sandbox_output import SandboxOutputService
 
 EmailMessage = namedtuple('EmailTemplate', ['subject', 'message'])
 

@@ -1,7 +1,7 @@
 import unittest
 from mock import Mock, MagicMock, patch, call
 
-from cloudshell.orch.training.teardown_orchestrator import TrainingTeardownWorkflow
+from cloudshell.workflow.training.teardown_orchestrator import TrainingTeardownWorkflow
 
 
 class TestTrainingTeardownWorkflow(unittest.TestCase):
@@ -9,7 +9,7 @@ class TestTrainingTeardownWorkflow(unittest.TestCase):
         self.sandbox = Mock()
         self.sandbox.global_inputs = {"Training Users": "test@test"}
 
-    @patch('cloudshell.orch.training.teardown_orchestrator.TrainingTeardownWorkflow._initialize')
+    @patch('cloudshell.workflow.training.teardown_orchestrator.TrainingTeardownWorkflow._initialize')
     def test_register(self, initialiaze_mock):
         # arrange
         teardown = TrainingTeardownWorkflow(self.sandbox)
@@ -25,7 +25,7 @@ class TestTrainingTeardownWorkflow(unittest.TestCase):
         self.sandbox.workflow.add_to_teardown.assert_called_with(
             teardown.default_teardown_workflow.default_teardown, None)
 
-    @patch('cloudshell.orch.training.teardown_orchestrator.UsersDataManagerService')
+    @patch('cloudshell.workflow.training.teardown_orchestrator.UsersDataManagerService')
     def test_users_data_loaded_on_init(self, user_data_manager_service_mock):
         # act
         teardown = TrainingTeardownWorkflow(self.sandbox)

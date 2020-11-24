@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock
 
-from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
+from cloudshell.workflow.training.services.sandbox_components import SandboxComponentsHelperService
 
 
 class TestSandboxComponentsHelperService(unittest.TestCase):

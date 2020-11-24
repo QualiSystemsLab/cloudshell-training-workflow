@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock, call
 
-from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
+from cloudshell.workflow.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
 
 
 class TestRequestedIPsIncrementStrategy(unittest.TestCase):

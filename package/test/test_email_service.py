@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock, ANY
 
-from cloudshell.orch.training.services.email import EmailService
+from cloudshell.workflow.training.services.email import EmailService
 
 
 class TestEmailService(unittest.TestCase):
@@ -31,7 +31,7 @@ class TestEmailService(unittest.TestCase):
         email = 'aaa@bbb.com'
         student_link = Mock()
         self.email_config.template_parameters = {}
-        self.email_config.template_name = 'cloudshell.orch.training.email_templates.default'
+        self.email_config.template_name = 'cloudshell.workflow.training.email_templates.default'
 
         # act
         self.email_service.send_email(email, student_link)

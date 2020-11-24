@@ -1,11 +1,11 @@
 from typing import Dict
 
-from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
+from cloudshell.workflow.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
 
 
 class EmailConfig:
     def __init__(self, smtp_server: str, user: str, password: str, from_address: str,
-                 email_template: str = 'cloudshell.orch.training.email_templates.default',
+                 email_template: str = 'cloudshell.workflow.training.email_templates.default',
                  template_parameters: Dict[str, str] = None, smtp_port=587):
         """
         :param smtp_server:

@@ -4,8 +4,8 @@ from cloudshell.api.cloudshell_api import ReservationAppResource, NameValuePair,
     DefaultDeployment, Deployment, Connector, \
     ReservationDescriptionInfo, ServiceInstance, CloudShellAPISession
 
-from cloudshell.orch.training.models.position import Position
-from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
+from cloudshell.workflow.training.models.position import Position
+from cloudshell.workflow.training.services.sandbox_output import SandboxOutputService
 
 SHARED_ATT_POSTFIX = 'shared'
 FALSEY_STRINGS = ['no', 'false', '0']

@@ -3,7 +3,7 @@ import random
 
 from mock import Mock, call, MagicMock
 
-from cloudshell.orch.training.logic.initialize_env import InitializeEnvironmentLogic
+from cloudshell.workflow.training.logic.initialize_env import InitializeEnvironmentLogic
 
 
 class TestInitializeEnvironmentLogic(unittest.TestCase):

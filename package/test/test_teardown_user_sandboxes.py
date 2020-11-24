@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock, MagicMock, call
 
-from cloudshell.orch.training.logic.teardown_user_sandboxes import SandboxTerminateLogic
+from cloudshell.workflow.training.logic.teardown_user_sandboxes import SandboxTerminateLogic
 
 
 class TestTeardownUserSandboxes(unittest.TestCase):
