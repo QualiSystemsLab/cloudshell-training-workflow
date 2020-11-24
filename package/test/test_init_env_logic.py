@@ -1,9 +1,13 @@
 import unittest
 import random
+from typing import List, Dict
 
+from cloudshell.api.cloudshell_api import ReservationAppResource, AttributeNameValue, Connector, CloudShellAPISession, \
+    DeploymentPathInfo, ReservationDescriptionInfo
 from mock import Mock, call, MagicMock
 
 from cloudshell.orch.training.logic.initialize_env import InitializeEnvironmentLogic
+from cloudshell.orch.training.models.position import Position
 
 
 class TestInitializeEnvironmentLogic(unittest.TestCase):
@@ -102,5 +106,145 @@ class TestInitializeEnvironmentLogic(unittest.TestCase):
         # assert
         self.assertEqual(result, (user_index + 1) * 10)
 
+    def test_create_duplicate_app_connectors_requests(self):
+        # arrange
+        mock_app: ReservationAppResource = Mock()
+        mock_connector1: Connector = Mock()
+        mock_connector1.Source = mock_app.Name
+        mock_attr_name = Mock()
+        mock_attr_val = Mock()
+        mock_attribute = AttributeNameValue(mock_attr_name, mock_attr_val)
+        mock_connector1.Attributes = [mock_attribute]
 
+        mock_connector2: Connector = Mock()
+        mock_connector2.Target = mock_app.Name
+        mock_connector2.Attributes = []
+
+        mock_app_connectors: List[Connector] = [mock_connector1, mock_connector2]
+
+        # act
+        returned_set_connector_requests, returned_connectors_attr_updates = self.init_env_logic._create_duplicate_app_connectors_requests(
+            mock_app, mock_app_connectors, Mock())
+
+        # assert
+        # Checking that connector 2 without attributes was not added
+        self.assertEqual(len(returned_set_connector_requests), 2)
+        self.assertEqual(len(returned_connectors_attr_updates), 1)
+
+    def test_duplicate_apps(self):
+        # arrange
+        mock_api: CloudShellAPISession = Mock()
+        mock_app:ReservationAppResource = Mock()
+        mock_app.Name = "mock_app_name"
+        mock_apps:List[ReservationAppResource] = [mock_app]
+        mock_app_connectors:Dict[str, List[Connector]] = MagicMock()
+        mock_sandbox_id: str = Mock()
+        self.init_env_logic._components_service.get_apps_to_duplicate = Mock(return_value=mock_apps)
+        service_app_positions_dict = MagicMock()
+        mock_service_app_positions = Mock()
+        service_app_positions_dict.__getitem__  = MagicMock(return_value = mock_service_app_positions)
+        self.init_env_logic._components_service.get_service_and_app_name_to_position_dict = MagicMock(return_value=service_app_positions_dict)
+        self.init_env_logic._env_data.users_list = [Mock()]
+        self.init_env_logic._duplicate_app_and_get_update_request = Mock()
+
+        # act
+        self.init_env_logic._duplicate_apps(mock_api,mock_apps,mock_app_connectors,mock_sandbox_id)
+
+        # assert
+        self.init_env_logic._duplicate_app_and_get_update_request.assert_called_once_with(mock_api,"1_mock_app_name",mock_app,mock_sandbox_id,mock_service_app_positions,0)
+
+    def test_duplicate_apps_none(self):
+        # arrange
+        mock_api: CloudShellAPISession = Mock()
+        mock_app:ReservationAppResource = Mock()
+        mock_app.Name = "mock_app_name"
+        mock_apps:List[ReservationAppResource] = [mock_app]
+        mock_app_connectors:Dict[str, List[Connector]] = MagicMock()
+        mock_sandbox_id: str = Mock()
+        self.init_env_logic._components_service.get_apps_to_duplicate = Mock(return_value=[])
+        service_app_positions_dict = MagicMock()
+        mock_service_app_positions = Mock()
+        service_app_positions_dict.__getitem__  = MagicMock(return_value = mock_service_app_positions)
+        self.init_env_logic._env_data.users_list = []
+        self.init_env_logic._duplicate_app_and_get_update_request = []
+
+        # act
+        return_val = self.init_env_logic._duplicate_apps(mock_api,mock_apps,mock_app_connectors,mock_sandbox_id)
+
+        # assert
+        mock_api.EditAppsInReservation.assert_not_called()
+        mock_api.SetConnectorsInReservation.assert_not_called()
+        self.assertEqual(return_val,[])
+
+    def test_get_private_ip_value_for_duplicate_app(self):
+        # arrange
+        mock_app: ReservationAppResource = Mock()
+        mock_deployment_path:DeploymentPathInfo  = Mock()
+        self.init_env_logic._components_service.get_default_deployment_option = Mock(return_value=mock_deployment_path)
+        mock_requested_ips_string = Mock()
+        self.init_env_logic._components_service.get_deployment_attribute_value = Mock(return_value=mock_requested_ips_string)
+        mock_app_duplicate_increment_octet = Mock()
+        self.init_env_logic._config.app_duplicate_increment_octet = mock_app_duplicate_increment_octet
+        mock_calculated_ip_increment = Mock()
+        self.init_env_logic._calculate_IP_increment = Mock(return_value=mock_calculated_ip_increment)
+        mock_user_index = Mock()
+
+        # act
+        return_value = self.init_env_logic._get_private_ip_value_for_duplicate_app(mock_app,mock_user_index)
+        # assert
+        self.init_env_logic._calculate_IP_increment.assert_called_once_with(mock_user_index)
+        self.init_env_logic._ips_increment_provider.increment_requested_ips_string.assert_called_with(mock_requested_ips_string,mock_app_duplicate_increment_octet,\
+                                                                                                      mock_calculated_ip_increment)
+
+    def test_prepare_requested_vnic_attr_connector_changes(self):
+        # arrange
+
+        mock_mgmt_connector: Connector = Mock()
+        mock_app_to_connectors_dict: Dict[str, List[Connector]] = MagicMock()
+        mock_app_to_connectors_dict.__getitem__ = MagicMock(return_value=[mock_mgmt_connector])
+
+        mock_sandbox_details: ReservationDescriptionInfo = Mock
+        mock_app: ReservationAppResource = Mock()
+        mock_sandbox_details.Apps = [mock_app]
+        self.init_env_logic._does_app_has_multiple_connectors = Mock(return_value=True)
+        self.init_env_logic._components_service.does_connector_has_existing_vnic_req = Mock(return_value=False)
+        self.init_env_logic._components_service.get_management_connector = Mock(return_value=mock_mgmt_connector)
+        self.init_env_logic._prepare_connector_change_req = Mock()
+
+        # act
+        self.init_env_logic._prepare_requested_vnic_attr_connector_changes(mock_app_to_connectors_dict,mock_sandbox_details)
+
+        # assert
+        self.init_env_logic._prepare_connector_change_req.assert_called_once_with(mock_app,mock_mgmt_connector,"0")
+
+
+    def test_duplicate_app_and_get_update_request(self):
+        # arrange
+        mock_api: CloudShellAPISession = Mock()
+        mock_new_app_name: str = "mock_new_app_name"
+        mock_app: ReservationAppResource = Mock()
+        mock_app.AppTemplateName = "mock_apptemplate_name"
+        mock_app.Name = "mock_app_name"
+        mock_sandbox_id: str = "mock_sandbox_id"
+        mock_app_pos: Position = Mock()
+        mock_user_index: int = random.randint(0, 100)
+        mock_new_app_pos = Mock()
+        mock_new_app_pos.X = random.randint(0, 100)
+        mock_new_app_pos.Y = random.randint(0, 100)
+        mock_return_position  = Mock()
+        mock_return_position.X = random.randint(0, 100)
+        mock_return_position.Y = random.randint(0, 100)
+        mock_api.AddAppToReservation = Mock(return_value=mock_new_app_pos)
+        self.init_env_logic._calculate_duplicate_app_position = Mock(return_value=mock_new_app_pos)
+        self.init_env_logic._config.app_duplicate_ip_increment = random.randint(0, 100)
+        self.init_env_logic._get_private_ip_value_for_duplicate_app = Mock()
+
+        # act
+        self.init_env_logic._duplicate_app_and_get_update_request(mock_api,mock_new_app_name,mock_app,mock_sandbox_id,mock_app_pos,mock_user_index)
+
+        # assert
+        self.init_env_logic._calculate_duplicate_app_position.assert_called_once_with(mock_app_pos,mock_user_index)
+        mock_api.AddAppToReservation.assert_called_once_with(reservationId=mock_sandbox_id, appName=mock_app.AppTemplateName,positionX=mock_new_app_pos.X,positionY=mock_new_app_pos.Y)
+        self.init_env_logic._get_private_ip_value_for_duplicate_app.assert_called_once()
+        self.init_env_logic._components_service.create_update_app_request.assert_called_once()
 

@@ -1,7 +1,7 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 
-from cloudshell.api.cloudshell_api import ReservationAppResource, NameValuePair, DeploymentPathInfo, ApiEditAppRequest, \
-    DefaultDeployment, Deployment, Connector, \
+from cloudshell.api.cloudshell_api import ReservationAppResource, NameValuePair, DeploymentPathInfo, \
+    ApiEditAppRequest, DefaultDeployment, Deployment, Connector, \
     ReservationDescriptionInfo, ServiceInstance, CloudShellAPISession
 
 from cloudshell.orch.training.models.position import Position
@@ -58,14 +58,14 @@ class SandboxComponentsHelperService:
 
         return ApiEditAppRequest(app_name, new_app_name, None, None, new_default_deployment)
 
-    def get_requested_vnic_attribute_name(self, connector: Connector, app: ReservationAppResource) -> str:
+    def get_requested_vnic_attribute_name(self, connector: Connector, app: ReservationAppResource) -> Optional[str]:
         if app.Name == connector.Source:
             return 'Requested Source vNIC Name'
         if app.Name == connector.Target:
             return 'Requested Target vNIC Name'
         return None
 
-    def get_requested_vnic_attribute(self, connector, app):
+    def get_requested_vnic_attribute(self, connector: Connector, app: ReservationAppResource):
         attr_name = self.get_requested_vnic_attribute_name(connector, app)
         for attr in connector.Attributes:
             if attr.Name == attr_name:

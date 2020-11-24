@@ -1,5 +1,5 @@
 from typing import List
-from cloudshell.workflow.orchestration.sandbox import Sandbox
+
 
 class TrainingEnvironmentDataModel:
     def __init__(self):

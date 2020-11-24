@@ -186,13 +186,14 @@ class TestUserSandboxesLogic(unittest.TestCase):
     def test_send_emails(self):
         # arrange
         self.env_data.users_list = ['user1', 'user2']
-        user1_link = Mock()
-        user2_link = Mock()
+        user1_link = 'Test link 1'
+        user2_link = 'Test link 2'
         self.users_data_manager.get_key = Mock(side_effect=[user1_link, user2_link])
 
         # act
         self.logic._send_emails()
 
         # assert
-        self.email_service.send_email.assert_has_calls([call('user1', user1_link), call('user2', user2_link)])
+        self.email_service.send_email.assert_has_calls([call(['user1'], 'Welcome to Training', template_parameters={'sandbox_link': user1_link}),
+                                                        call(['user2'], 'Welcome to Training', template_parameters={'sandbox_link': user2_link})])
         self.assertEqual(self.email_service.send_email.call_count, 2)
