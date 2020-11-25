@@ -61,26 +61,3 @@ class TestIPsHandlerService(unittest.TestCase):
 
         # assert
         self.assertEqual('10.10.0.10-15', new_ip_range)
-
-    def test_is_range_true(self):
-        # act
-        result = self.ips_handler.is_range('10.0.0.1-10')
-
-        # assert
-        self.assertTrue(result)
-
-    def test_is_range_false(self):
-        # act
-        result = self.ips_handler.is_range('10.0.0.0')
-
-        # assert
-        self.assertFalse(result)
-
-    def test_validate_ip_address_invalid(self):
-        with self.assertRaises(Exception):
-            self.ips_handler.validate_ip_address('10.0.0.1-10')
-
-    def test_validate_ip_address_is_valid(self):
-        # if method pass with raising then its valid
-        self.ips_handler.validate_ip_address('10.0.0.1')
-

@@ -1,4 +1,5 @@
 import logging
+from cloudshell.cp.core.requested_ips.validator import RequestedIPsValidator
 
 from cloudshell.orch.training.services.ips_handler import IPsHandlerService
 
@@ -28,7 +29,7 @@ class RequestedIPsIncrementStrategy:
         for ip_req_single in ip_req_for_nic.split(','):
             ip_req_single = ip_req_single.strip()
 
-            if self._ips_handler.is_range(ip_req_single):
+            if RequestedIPsValidator.is_range(ip_req_single):
                 new_ip_str = self._ips_handler.increment_ip_range(ip_req_single, increment_octet, increment_size)
 
             else:

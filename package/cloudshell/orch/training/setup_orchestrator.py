@@ -1,7 +1,7 @@
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.workflow.orchestration.setup.default_setup_orchestrator import DefaultSetupWorkflow
 
-from cloudshell.orch.training.parsers.sandbox_inputs_processing import SandboxInputsParser
+from cloudshell.orch.training.parsers.sandbox_inputs import SandboxInputsParser
 from cloudshell.orch.training.logic.create_user_sandboxes import UserSandboxesLogic
 from cloudshell.orch.training.logic.initialize_env import InitializeEnvironmentLogic
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
