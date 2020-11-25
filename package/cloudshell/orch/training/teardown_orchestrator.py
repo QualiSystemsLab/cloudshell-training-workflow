@@ -2,7 +2,7 @@ from cloudshell.workflow.orchestration.sandbox import Sandbox
 from cloudshell.workflow.orchestration.teardown.default_teardown_orchestrator import DefaultTeardownWorkflow
 
 from cloudshell.orch.training.models.config import TrainingWorkflowConfig
-from cloudshell.orch.training.parsers.sandbox_inputs_processing import SandboxInputsParser
+from cloudshell.orch.training.parsers.sandbox_inputs import SandboxInputsParser
 from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
 from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
 from cloudshell.orch.training.services.sandbox_output import SandboxOutputService

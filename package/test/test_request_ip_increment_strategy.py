@@ -1,6 +1,6 @@
 import unittest
 
-from mock import Mock, call
+from mock import Mock, call, patch
 
 from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
 
@@ -43,10 +43,11 @@ class TestRequestedIPsIncrementStrategy(unittest.TestCase):
         self.ip_increment_strategy._increment_ip_req_for_nic.assert_called_once_with('x', '/24', 10)
         self.assertEqual("x'", result)
 
-    def test_increment_ip_req_for_nic_single_ip(self):
+    @patch('cloudshell.orch.training.services.ip_increment_strategy.RequestedIPsValidator')
+    def test_increment_ip_req_for_nic_single_ip(self, req_ip_validator_mock):
         # arrange
         request = 'x'
-        self.ips_handler.is_range.return_value = False
+        req_ip_validator_mock.is_range.return_value = False
         self.ips_handler.increment_single_ip.side_effect = self._change_req_ip
 
         # act
@@ -56,10 +57,11 @@ class TestRequestedIPsIncrementStrategy(unittest.TestCase):
         self.assertEqual(result, "x'")
         self.ips_handler.increment_single_ip.assert_called_once()
 
-    def test_increment_ip_req_for_nic_complex(self):
+    @patch('cloudshell.orch.training.services.ip_increment_strategy.RequestedIPsValidator')
+    def test_increment_ip_req_for_nic_complex(self, req_ip_validator_mock):
         # arrange
         request = 'x,y,z'
-        self.ips_handler.is_range.side_effect = [False, True, False]
+        req_ip_validator_mock.is_range.side_effect = [False, True, False]
         self.ips_handler.increment_single_ip.side_effect = self._change_req_ip
         self.ips_handler.increment_ip_range.side_effect = self._change_req_ip
 
