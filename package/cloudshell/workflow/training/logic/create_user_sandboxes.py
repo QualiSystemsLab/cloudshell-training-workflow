@@ -135,4 +135,3 @@ class UserSandboxesLogic:
         # will run before the student sandbox teardown. Adding buffer of 15 minutes.
         duration_with_buffer = duration_until_instructor_sandbox_ends + 15
         return duration_with_buffer
-
