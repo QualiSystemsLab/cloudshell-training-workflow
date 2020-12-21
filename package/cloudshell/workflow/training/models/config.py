@@ -1,8 +1,8 @@
 from typing import Dict
 
-from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
+from cloudshell.workflow.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
 from cloudshell.email import EmailConfig
-from cloudshell.orch.training.services.ips_handler import IPsHandlerService
+from cloudshell.workflow.training.services.ips_handler import IPsHandlerService
 
 
 # todo - add config validations

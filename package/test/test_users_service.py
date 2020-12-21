@@ -3,7 +3,7 @@ import unittest
 from cloudshell.api.common_cloudshell_api import CloudShellAPIError
 from mock import Mock, ANY, MagicMock
 
-from cloudshell.orch.training.services.users import UsersService
+from cloudshell.workflow.training.services.users import UsersService
 
 
 class TestUsersService(unittest.TestCase):

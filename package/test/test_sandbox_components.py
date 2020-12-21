@@ -6,8 +6,8 @@ from cloudshell.api.cloudshell_api import Connector, ReservationAppResource, Res
     AttributeValueInfo
 from mock import Mock
 
-from cloudshell.orch.training.services.sandbox_components import SandboxComponentsHelperService
-from cloudshell.orch.training.models.position import Position
+from cloudshell.workflow.training.services.sandbox_components import SandboxComponentsHelperService
+from cloudshell.workflow.training.models.position import Position
 
 
 class TestSandboxComponentsHelperService(unittest.TestCase):

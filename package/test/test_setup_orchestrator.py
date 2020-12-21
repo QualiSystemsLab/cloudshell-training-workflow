@@ -3,8 +3,8 @@ import unittest
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 from mock import Mock, MagicMock, patch
 
-from cloudshell.orch.training.models.config import TrainingWorkflowConfig
-from cloudshell.orch.training.setup_orchestrator import TrainingSetupWorkflow
+from cloudshell.workflow.training.models.config import TrainingWorkflowConfig
+from cloudshell.workflow.training.setup_orchestrator import TrainingSetupWorkflow
 
 
 class TestTrainingSetupWorkflow(unittest.TestCase):
@@ -42,7 +42,7 @@ class TestTrainingSetupWorkflow(unittest.TestCase):
         self.sandbox.workflow.add_to_configuration.assert_not_called()
         self.sandbox.workflow.on_configuration_ended.assert_not_called()
 
-    @patch('cloudshell.orch.training.setup_orchestrator.UsersDataManagerService')
+    @patch('cloudshell.workflow.training.setup_orchestrator.UsersDataManagerService')
     def test_initialize(self, users_data_manager_class):
         # arrange
         self.setup._users_data_manager.load = Mock()

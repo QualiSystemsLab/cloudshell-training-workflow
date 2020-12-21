@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock
 
-from cloudshell.orch.training.services.ips_handler import IPsHandlerService
+from cloudshell.workflow.training.services.ips_handler import IPsHandlerService
 
 
 class TestIPsHandlerService(unittest.TestCase):
