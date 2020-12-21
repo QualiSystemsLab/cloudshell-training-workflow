@@ -6,8 +6,8 @@ from cloudshell.api.cloudshell_api import ReservationAppResource, AttributeNameV
     DeploymentPathInfo, ReservationDescriptionInfo
 from mock import Mock, call, MagicMock
 
-from cloudshell.orch.training.logic.initialize_env import InitializeEnvironmentLogic
-from cloudshell.orch.training.models.position import Position
+from cloudshell.workflow.training.logic.initialize_env import InitializeEnvironmentLogic
+from cloudshell.workflow.training.models.position import Position
 
 
 class TestInitializeEnvironmentLogic(unittest.TestCase):

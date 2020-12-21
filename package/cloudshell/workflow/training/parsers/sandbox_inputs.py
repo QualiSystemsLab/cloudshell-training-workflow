@@ -1,6 +1,6 @@
 from typing import List
 
-from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
+from cloudshell.workflow.training.models.training_env import TrainingEnvironmentDataModel
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
 

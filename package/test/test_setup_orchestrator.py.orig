@@ -2,8 +2,8 @@ import unittest
 
 from mock import Mock, MagicMock
 
-from cloudshell.orch.training.models.config import TrainingWorkflowConfig
-from cloudshell.orch.training.setup_orchestrator import TrainingSetupWorkflow
+from cloudshell.workflow.training.models.config import TrainingWorkflowConfig
+from cloudshell.workflow.training.setup_orchestrator import TrainingSetupWorkflow
 
 
 class TestTrainingSetupWorkflow(unittest.TestCase):

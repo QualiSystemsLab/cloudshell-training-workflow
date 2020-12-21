@@ -2,8 +2,8 @@ import unittest
 
 from mock import Mock
 
-from cloudshell.orch.training.models.student_link import StudentLinkModel
-from cloudshell.orch.training.services.student_links import StudentLinksProvider
+from cloudshell.workflow.training.models.student_link import StudentLinkModel
+from cloudshell.workflow.training.services.student_links import StudentLinksProvider
 
 
 class TestStudentLinksProvider(unittest.TestCase):

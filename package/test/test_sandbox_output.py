@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock
 
-from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
+from cloudshell.workflow.training.services.sandbox_output import SandboxOutputService
 
 
 class TestSandboxOutput(unittest.TestCase):

@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock
 
-from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService, USERS_DICT_KEY
+from cloudshell.workflow.training.services.users_data_manager import UsersDataManagerService, USERS_DICT_KEY
 
 
 class TestUsersDataManagerService(unittest.TestCase):

@@ -11,7 +11,7 @@ with open('test_requirements.txt') as f_tests:
     required_for_tests = f_tests.read().splitlines()
 
 setup(
-        name="cloudshell-orch-training",
+        name="cloudshell-workflow-training",
         author="Quali",
         author_email="support@qualisystems.com",
         description="A package providing an extension for the default setup workflow for training use cases",

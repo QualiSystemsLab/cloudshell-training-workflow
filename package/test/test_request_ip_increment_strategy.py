@@ -2,7 +2,7 @@ import unittest
 
 from mock import Mock, call, patch
 
-from cloudshell.orch.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
+from cloudshell.workflow.training.services.ip_increment_strategy import RequestedIPsIncrementStrategy
 
 
 class TestRequestedIPsIncrementStrategy(unittest.TestCase):
@@ -43,7 +43,7 @@ class TestRequestedIPsIncrementStrategy(unittest.TestCase):
         self.ip_increment_strategy._increment_ip_req_for_nic.assert_called_once_with('x', '/24', 10)
         self.assertEqual("x'", result)
 
-    @patch('cloudshell.orch.training.services.ip_increment_strategy.RequestedIPsValidator')
+    @patch('cloudshell.workflow.training.services.ip_increment_strategy.RequestedIPsValidator')
     def test_increment_ip_req_for_nic_single_ip(self, req_ip_validator_mock):
         # arrange
         request = 'x'
@@ -57,7 +57,7 @@ class TestRequestedIPsIncrementStrategy(unittest.TestCase):
         self.assertEqual(result, "x'")
         self.ips_handler.increment_single_ip.assert_called_once()
 
-    @patch('cloudshell.orch.training.services.ip_increment_strategy.RequestedIPsValidator')
+    @patch('cloudshell.workflow.training.services.ip_increment_strategy.RequestedIPsValidator')
     def test_increment_ip_req_for_nic_complex(self, req_ip_validator_mock):
         # arrange
         request = 'x,y,z'

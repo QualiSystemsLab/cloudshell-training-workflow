@@ -1,11 +1,11 @@
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
-from cloudshell.orch.training.models.training_env import TrainingEnvironmentDataModel
-from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
-from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
-from cloudshell.orch.training.services.sandbox_lifecycle import SandboxLifecycleService
-from cloudshell.orch.training.services.users import UsersService
-from cloudshell.orch.training.services.users_data_manager import UsersDataManagerService, \
+from cloudshell.workflow.training.models.training_env import TrainingEnvironmentDataModel
+from cloudshell.workflow.training.services.sandbox_api import SandboxAPIService
+from cloudshell.workflow.training.services.sandbox_output import SandboxOutputService
+from cloudshell.workflow.training.services.sandbox_lifecycle import SandboxLifecycleService
+from cloudshell.workflow.training.services.users import UsersService
+from cloudshell.workflow.training.services.users_data_manager import UsersDataManagerService, \
     UsersDataManagerServiceKeys as userDataKeys
 
 

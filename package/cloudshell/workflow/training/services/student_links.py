@@ -1,8 +1,8 @@
 from cloudshell.api.common_cloudshell_api import CloudShellAPIError
 from cloudshell.workflow.orchestration.sandbox import Sandbox
 
-from cloudshell.orch.training.models.student_link import StudentLinkModel
-from cloudshell.orch.training.services.sandbox_api import SandboxAPIService
+from cloudshell.workflow.training.models.student_link import StudentLinkModel
+from cloudshell.workflow.training.services.sandbox_api import SandboxAPIService
 
 
 class StudentLinksProvider:

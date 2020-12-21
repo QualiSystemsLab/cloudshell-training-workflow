@@ -1,5 +1,5 @@
 from cloudshell.workflow.orchestration.sandbox import Sandbox
-from cloudshell.orch.training.setup_orchestrator import TrainingSetupWorkflow
+from cloudshell.workflow.training.setup_orchestrator import TrainingSetupWorkflow
 import cloudshell.helpers.scripts.cloudshell_dev_helpers as dev_helpers
 
 if dev_helpers.is_dev_mode():
