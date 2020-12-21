@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from freezegun import freeze_time
 from mock import MagicMock, call, ANY
 
-#from cloudshell.workflow.training.logic.create_user_sandboxes import UserSandboxesLogic
+from cloudshell.workflow.training.logic.create_user_sandboxes import UserSandboxesLogic
 from cloudshell.workflow.training.models.position import Position
 from cloudshell.workflow.training.models.student_link import StudentLinkModel
 from cloudshell.workflow.training.services.users_data_manager import UsersDataManagerServiceKeys as userDataKeys
